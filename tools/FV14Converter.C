@@ -66,8 +66,9 @@ void ReadAndWriteCoordinate(std::ofstream& out, T** ptr, PDMlib::ContainerInfo c
     }else if(container_info.VectorOrder == PDMlib::IJKN){
         FV14Writer::WriteCoordIJKN(out, ptr, length);
     }
-    delete [] *ptr;
+    delete[] *ptr;
 }
+
 void ReadAndWriteCoordinateSelector(std::ofstream& out, PDMlib::ContainerInfo container_info, const int& time_step)
 {
     if(container_info.Type == PDMlib::INT32)
@@ -109,7 +110,7 @@ void ReadAndWriteContainer(std::ofstream& out, T** ptr, PDMlib::ContainerInfo co
             FV14Writer::WriteVectorIJKN(out, ptr, length);
         }
     }
-    delete [] *ptr;
+    delete[] *ptr;
 }
 
 void ReadAndWriteContainerSelector(std::ofstream& out, PDMlib::ContainerInfo container_info, const int& time_step)

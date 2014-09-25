@@ -87,6 +87,52 @@ void ListDirectoryContents(std::string dir_name, std::vector<std::string>* filen
     closedir(dp);
 }
 
+bool is_all_digit(const std::string& str)
+{
+    for(std::string::const_iterator it = str.begin(); it != str.end(); ++it)
+    {
+        if(!isdigit(*it)) return false;
+    }
+    return true;
+}
+
+int get_time_step(const std::string& filename)
+{
+    int pos_period   = filename.find_last_of('.');
+    int pos_underbar = filename.find_last_of('_');
+    if(pos_period == std::string::npos || pos_underbar == std::string::npos)
+    {
+        return -1;
+    }
+    std::string str_time_step(filename.substr(pos_underbar+1, pos_period-(pos_underbar+1)));
+    if(!is_all_digit(str_time_step))
+    {
+        return -2;
+    }
+    return stoi(str_time_step);
+}
+
+int get_region_number(const std::string& filename)
+{
+    int pos_underbar = filename.find_last_of('_');
+    if(pos_underbar == std::string::npos)
+    {
+        return -1;
+    }
+    std::string first_half(filename.substr(0, pos_underbar));
+    pos_underbar = first_half.find_last_of('_');
+    if(pos_underbar == std::string::npos)
+    {
+        return -1;
+    }
+    std::string str_region_number(first_half.substr(pos_underbar+1, std::string::npos));
+    if(!is_all_digit(str_region_number))
+    {
+        return -2;
+    }
+    return stoi(str_region_number);
+}
+
 void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name, const int& start_time, const int& end_time)
 {
     std::vector<std::string> filenames;
@@ -95,13 +141,13 @@ void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, con
     {
         if((*it).find(keyword) != std::string::npos)
         {
-            int         pos_underbar = (*it).find_last_of('_');
-            int         pos_period   = (*it).find_last_of('.');
-            std::string str_time_step((*it).substr(pos_underbar+1, pos_period-pos_underbar));
-            int         time_step = stoi(str_time_step);
-            if(start_time <= time_step && time_step <= end_time)
+            int time_step = get_time_step(*it);
+            if(time_step >= 0)
             {
-                time_steps->insert(time_step);
+                if(start_time <= time_step && time_step <= end_time)
+                {
+                    time_steps->insert(time_step);
+                }
             }
         }
     }

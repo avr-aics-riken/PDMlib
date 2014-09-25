@@ -15,8 +15,7 @@ class Read
 {
     //non-copyable
     Read(const Read&);
-    Read& operator=(const Read&
-                    );
+    Read& operator=(const Read&);
 
 protected:
     Read(){}
@@ -58,8 +57,7 @@ public:
     int read(const char* filename, size_t& original_size, char** data);
 
 private:
-    bool isNativeEndian(const int& byte_order_mark
-                        );
+    bool isNativeEndian(const int& byte_order_mark);
 
     template<typename T>
     void convert_endian(T* value)
