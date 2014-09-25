@@ -13,8 +13,7 @@ class Write
 {
     //non-copyable
     Write(const Write&);
-    Write& operator=(const Write&
-                     );
+    Write& operator=(const Write&);
 
 protected:
     Write(){}

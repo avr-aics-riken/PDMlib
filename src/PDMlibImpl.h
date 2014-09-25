@@ -18,11 +18,12 @@ struct ContainerPointer
 {
     std::string Name;
     SupportedType Type;
-    size_t ContainerLength;        // コンテナの要素数
-    void** Container;              // ユーザコード側にデータを渡す時のポインタ
-    size_t size;                   // buffのデータ長（byte)
-    char* buff;                    // ライブラリ内で一時的にデータを格納する領域
-    size_t nComp;                  // コンテナの1オブジェクトあたりのベクトル長
+    size_t ContainerLength;        //< コンテナの要素数
+    void** Container;              //< ユーザコード側にデータを渡す時のポインタ
+    size_t size;                   //< buffのデータ長（byte)
+    char* buff;                    //< ライブラリ内で一時的にデータを格納する領域
+    size_t nComp;                  //< コンテナの1オブジェクトあたりのベクトル長
+    bool NIJK_Flag;                //< データの格納順がNIJKであればtrue, IJKNであればfalse
 };
 
 //! PDMlibの実装を提供するクラス
@@ -445,19 +446,43 @@ public:
 
     void Set_Geom_Multi_Fn(Zoltan* zz)
     {
-        if(CoordinateContainer->Type == INT32)
+        /*
+         * memo: Set_Geom_Multi_Fnと同様のquery関数にSet_Geom_Fnがあるが
+         *       こちらは一要素づつ取得するためのもの
+         *       複数要素を一括して取得する時は_Multi版を使う
+         *       他のZoltanのquery関数についても同様
+         */
+        if(CoordinateContainer->NIJK_Flag)
         {
-            zz->Set_Geom_Multi_Fn(get_geometry_list_int, CoordinateContainer->buff);
-        }else if(CoordinateContainer->Type == uINT32){
-            zz->Set_Geom_Multi_Fn(get_geometry_list_uint, CoordinateContainer->buff);
-        }else if(CoordinateContainer->Type == INT64){
-            zz->Set_Geom_Multi_Fn(get_geometry_list_long, CoordinateContainer->buff);
-        }else if(CoordinateContainer->Type == uINT64){
-            zz->Set_Geom_Multi_Fn(get_geometry_list_ulong, CoordinateContainer->buff);
-        }else if(CoordinateContainer->Type == FLOAT){
-            zz->Set_Geom_Multi_Fn(get_geometry_list_float, CoordinateContainer->buff);
-        }else if(CoordinateContainer->Type == DOUBLE){
-            zz->Set_Geom_Multi_Fn(get_geometry_list_double, CoordinateContainer->buff);
+            if(CoordinateContainer->Type == INT32)
+            {
+                zz->Set_Geom_Multi_Fn(get_geometry_list_int, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == uINT32){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_uint, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == INT64){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_long, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == uINT64){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_ulong, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == FLOAT){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_float, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == DOUBLE){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_double, CoordinateContainer->buff);
+            }
+        }else{
+            if(CoordinateContainer->Type == INT32)
+            {
+                zz->Set_Geom_Multi_Fn(get_geometry_list_int_ijkn, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == uINT32){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_uint_ijkn, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == INT64){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_long_ijkn, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == uINT64){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_ulong_ijkn, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == FLOAT){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_float_ijkn, CoordinateContainer->buff);
+            }else if(CoordinateContainer->Type == DOUBLE){
+                zz->Set_Geom_Multi_Fn(get_geometry_list_double_ijkn, CoordinateContainer->buff);
+            }
         }
     }
 
@@ -618,6 +643,84 @@ public:
         for(int i = 0; i < length; i++)
         {
             geom_vec[i] = (double)coord[i];
+        }
+    }
+
+    static void get_geometry_list_int_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        int* coord = (int*)data;
+        *ierr = ZOLTAN_OK;
+        int  length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
+        }
+    }
+
+    static void get_geometry_list_uint_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        unsigned int* coord = (unsigned int*)data;
+        *ierr = ZOLTAN_OK;
+        int           length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
+        }
+    }
+
+    static void get_geometry_list_long_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        long* coord = (long*)data;
+        *ierr = ZOLTAN_OK;
+        int   length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
+        }
+    }
+
+    static void get_geometry_list_ulong_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        unsigned long* coord = (unsigned long*)data;
+        *ierr = ZOLTAN_OK;
+        int            length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
+        }
+    }
+
+    static void get_geometry_list_float_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        float* coord = (float*)data;
+        *ierr = ZOLTAN_OK;
+        int    length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
+        }
+    }
+
+    static void get_geometry_list_double_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
+    {
+        double* coord = (double*)data;
+        *ierr = ZOLTAN_OK;
+        int     length = (CoordinateContainer->ContainerLength)/3;
+        for(int i = 0; i < length; i++)
+        {
+            geom_vec[3*i]   = (double)coord[i];
+            geom_vec[3*i+1] = (double)coord[i+length];
+            geom_vec[3*i+2] = (double)coord[i+length*2];
         }
     }
 
