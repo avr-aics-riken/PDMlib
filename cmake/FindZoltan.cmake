@@ -1,0 +1,31 @@
+# - Try to find Zoltan
+# Once done, this will define
+#
+#  Zoltan_FOUND - system has Zoltan
+#  Zoltan_INCLUDE_DIRS - the Zoltan include directories
+#  Zoltan_LIBRARIES - link these to use Zoltan
+
+include(LibFindMacros)
+
+# Use pkg-config to get hints about paths
+libfind_pkg_check_modules(Zoltan_PKGCONF Zoltan)
+
+# Include dir
+find_path(Zoltan_INCLUDE_DIR
+  NAMES zoltan_cpp.h
+  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_INCLUDE_DIRS}
+  PATH_SUFFIXES include
+)
+
+# Finally the library itself
+find_library(Zoltan_LIBRARY
+  NAMES zoltan
+  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_LIBRARY_DIRS}
+  PATH_SUFFIXES lib 
+)
+
+# Set the include dir variables and the libraries and let libfind_process do the rest.
+# NOTE: Singular variables for this library, plural for libraries this this lib depends on.
+set(Zoltan_INCLUDES Zoltan_INCLUDE_DIR)
+set(Zoltan_LIBS Zoltan_LIBRARY)
+libfind_process(Zoltan)

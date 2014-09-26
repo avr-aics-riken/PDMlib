@@ -134,7 +134,7 @@ public:
     //! @return -3     ContainerLengthが不正値 (負の値）
     //! @return -4     ContaierにNULLポインタが指定されていた
     //! @return -5     NumCompが不正値（1または3以外の値）
-    //! @return -6     TimeStepが不整地 （負の値）
+    //! @return -6     TimeStepが不正値（負の値）
     //
     template<typename T>
     int Write(const std::string&Name, const size_t &ContainerLength, T*Container, T MinMax[8], const int& NumComp, const int& TimeStep, const double& Time);
@@ -184,6 +184,7 @@ public:
 //
 //pimpl idiom
 //
+
 private:
     class Impl; // forward declaration
     Impl* pImpl;
