@@ -31,8 +31,7 @@ public:
 private:
     //non-copyable
     MetaData(const MetaData& arg);
-    MetaData& operator=(const MetaData& arg
-                        );
+    MetaData& operator=(const MetaData& arg);
 
 public:
     //! MetaData情報を読み込む
@@ -149,8 +148,7 @@ public:
     //
     //! 通常の実行時(以前のジョブ実行結果を読み込む）は一致しないメンバも含まれるので
     //! テスト以外では使用しないこと
-    bool Compare(const MetaData& lhs
-                 ) const;
+    bool Compare(const MetaData& lhs) const;
 
 private:
     //! 実行中の処理系におけるエンディアンを判定する

@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(comm, &myrank);
     std::string    base_filename("PDMlibMigrationDemo");
     std::string    dfi_filename = base_filename+".dfi";
-    size_t         NumData      = 10;
+    size_t         NumData      = 10000;
     float*         Coord        = NULL;
 
     int*           IntScaler    = NULL;
@@ -71,20 +71,20 @@ int main(int argc, char* argv[])
 
             double                bbox[6] = {0, 0, 0, 3*NumData, 3*NumData, 3*NumData};
             PDMlib::PDMlib::GetInstance().SetBoundingBox(bbox);
-            PDMlib::ContainerInfo container_info1  = {"IntScaler", "N/A", "none", PDMlib::INT32, "ints", 1};
-            PDMlib::ContainerInfo container_info2  = {"LongScaler", "N/A", "none", PDMlib::INT64, "longs", 1};
-            PDMlib::ContainerInfo container_info3  = {"uIntScaler", "N/A", "none", PDMlib::uINT32, "uints", 1};
-            PDMlib::ContainerInfo container_info4  = {"uLongScaler", "N/A", "none", PDMlib::uINT64, "ulongs", 1};
-            PDMlib::ContainerInfo container_info5  = {"FloatScaler", "N/A", "none", PDMlib::FLOAT, "floats", 1};
+            PDMlib::ContainerInfo container_info1  = {"IntScaler",    "N/A", "none", PDMlib::INT32,  "ints",    1};
+            PDMlib::ContainerInfo container_info2  = {"LongScaler",   "N/A", "none", PDMlib::INT64,  "longs",   1};
+            PDMlib::ContainerInfo container_info3  = {"uIntScaler",   "N/A", "none", PDMlib::uINT32, "uints",   1};
+            PDMlib::ContainerInfo container_info4  = {"uLongScaler",  "N/A", "none", PDMlib::uINT64, "ulongs",  1};
+            PDMlib::ContainerInfo container_info5  = {"FloatScaler",  "N/A", "none", PDMlib::FLOAT,  "floats",  1};
             PDMlib::ContainerInfo container_info6  = {"DoubleScaler", "N/A", "none", PDMlib::DOUBLE, "doubles", 1};
-            PDMlib::ContainerInfo container_info7  = {"IntVector", "N/A", "none", PDMlib::INT32, "intv", 3};
-            PDMlib::ContainerInfo container_info8  = {"LongVector", "N/A", "none", PDMlib::INT64, "longv", 3};
-            PDMlib::ContainerInfo container_info9  = {"uIntVector", "N/A", "none", PDMlib::uINT32, "uintv", 3};
-            PDMlib::ContainerInfo container_info10 = {"uLongVector", "N/A", "none", PDMlib::uINT64, "ulongv", 3};
-            PDMlib::ContainerInfo container_info11 = {"FloatVector", "N/A", "none", PDMlib::FLOAT, "floatv", 3};
-            PDMlib::ContainerInfo container_info12 = {"DoubleVector", "N/A", "none", PDMlib::DOUBLE, "doublev", 3};
-            PDMlib::ContainerInfo container_info13 = {"Coordinate", "N/A", "none", PDMlib::FLOAT, "coord", 3};
-            PDMlib::ContainerInfo container_info14 = {"Rank_Number", "N/A", "none", PDMlib::INT32, "rank", 1};
+            PDMlib::ContainerInfo container_info7  = {"IntVector",    "N/A", "none", PDMlib::INT32,  "intv",    3, PDMlib::NIJK};
+            PDMlib::ContainerInfo container_info8  = {"LongVector",   "N/A", "none", PDMlib::INT64,  "longv",   3, PDMlib::IJKN};
+            PDMlib::ContainerInfo container_info9  = {"uIntVector",   "N/A", "none", PDMlib::uINT32, "uintv",   3, PDMlib::NIJK};
+            PDMlib::ContainerInfo container_info10 = {"uLongVector",  "N/A", "none", PDMlib::uINT64, "ulongv",  3, PDMlib::IJKN};
+            PDMlib::ContainerInfo container_info11 = {"FloatVector",  "N/A", "none", PDMlib::FLOAT,  "floatv",  3, PDMlib::NIJK};
+            PDMlib::ContainerInfo container_info12 = {"DoubleVector", "N/A", "none", PDMlib::DOUBLE, "doublev", 3, PDMlib::IJKN};
+            PDMlib::ContainerInfo container_info13 = {"Coordinate",   "N/A", "none", PDMlib::FLOAT,  "coord",   3, PDMlib::NIJK};
+            PDMlib::ContainerInfo container_info14 = {"Rank_Number",  "N/A", "none", PDMlib::INT32,  "rank",    1};
 
             PDMlib::PDMlib::GetInstance().AddContainer(container_info1);
             PDMlib::PDMlib::GetInstance().AddContainer(container_info2);
