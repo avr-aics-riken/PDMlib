@@ -1,3 +1,12 @@
+/*
+ * PDMlib - Particle Data Management library
+ *
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
 #ifndef PDMLIB_PDMLIB_H
 #define PDMLIB_PDMLIB_H
 #include <string>

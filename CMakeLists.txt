@@ -1,3 +1,13 @@
+###################################################################################
+#
+# PDMlib - Particle Data Management library
+#
+#
+# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
+# All rights reserved. 
+#
+###################################################################################
+
 cmake_minimum_required(VERSION 2.6)
 
 project(PDMlib CXX)

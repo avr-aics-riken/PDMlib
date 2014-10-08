@@ -7,8 +7,12 @@
  *
  */
 
-following three files are from google test.
- - gtest/LICENSE
- - gtest/gtest-all.cc
- - gtest/gtest.h
+
+REVISION HISTORY
+================
+
+--------------------------
+2014-10-09  version 1.0.0
+- Initial release
+
 

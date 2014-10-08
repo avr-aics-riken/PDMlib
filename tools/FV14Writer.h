@@ -1,3 +1,12 @@
+/*
+ * PDMlib - Particle Data Management library
+ *
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
 #ifndef FV14WRITER_H
 #define FV14WRITER_H
 #include <iostream>

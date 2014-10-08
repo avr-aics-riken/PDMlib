@@ -1,4 +1,13 @@
 /*
+ * PDMlib - Particle Data Management library
+ *
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
+/*
  * マイグレーション機能のデモプログラム
  *
  *   実行時のディレクトリにdfiファイルが存在しなければ、新規のデータを作成して終了し

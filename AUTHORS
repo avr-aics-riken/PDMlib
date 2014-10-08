@@ -7,8 +7,16 @@
  *
  */
 
-following three files are from google test.
- - gtest/LICENSE
- - gtest/gtest-all.cc
- - gtest/gtest.h
+
+CONTRIBUTORS
+============
+
+
+First       Last
+-------     ------
+
+Kenji       Ono          keno@riken.jp
+Naoyuki     Sogo
+
+
 

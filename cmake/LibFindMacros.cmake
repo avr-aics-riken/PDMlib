@@ -1,3 +1,13 @@
+###################################################################################
+#
+# PDMlib - Particle Data Management library
+#
+#
+# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
+# All rights reserved. 
+#
+###################################################################################
+
 # Version 2.2
 # Public Domain, originally written by Lasse Kärkkäinen <tronic>
 # Maintained at https://github.com/Tronic/cmake-modules

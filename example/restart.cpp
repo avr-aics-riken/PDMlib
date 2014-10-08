@@ -1,4 +1,14 @@
 /*
+ * PDMlib - Particle Data Management library
+ *
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
+
+/*
  * データの読み込みを行うサンプルプログラム
  *
  * 出力サンプルプログラム(write.cpp)が出力するデータを入力データとして使用しているので

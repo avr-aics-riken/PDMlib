@@ -1,4 +1,13 @@
 /*
+ * PDMlib - Particle Data Management library
+ *
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
+/*
  * google testをパラレルに実行するためのmain関数
  * テストは各プロセスで独立に実行され、結果の集計などは行なわないため
  * プロセス間でテスト結果に違いが生じる可能性がある
