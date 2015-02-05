@@ -53,7 +53,7 @@ protected:
 //圧縮すると色々と問題が出る可能性があるので、圧縮はしないこと
 class WriteTextFile: public WriteFile
 {
-    friend WriteFactory;
+    friend class WriteFactory;
     WriteTextFile(const std::string& arg_type, const char& arg_delimiter): type(arg_type),
                                                                            delimiter(arg_delimiter)
     {
@@ -79,7 +79,7 @@ private:
 //! バイナリ形式でファイル出力を行う具象クラス
 class WriteBinaryFile: public WriteFile
 {
-    friend WriteFactory;
+    friend class WriteFactory;
     WriteBinaryFile(){}
 
 public:
@@ -115,7 +115,7 @@ protected:
 //! zip形式による圧縮機能を提供する具象デコレータ
 class ZipEncoder: public Encoder
 {
-    friend WriteFactory;
+    friend class WriteFactory;
     explicit ZipEncoder(Write* arg): Encoder(arg){}
 
 public:
@@ -125,7 +125,7 @@ public:
 //! fpzip形式による圧縮機能を提供する具象デコレータ
 class FpzipEncoder: public Encoder
 {
-    friend WriteFactory;
+    friend class WriteFactory;
     explicit FpzipEncoder(Write* arg, bool is_dp, int arg_vlen): Encoder(arg),
                                                                  dp(0),
                                                                  vlen(arg_vlen)
@@ -144,7 +144,7 @@ private:
 //! RLEアルゴリズムによる圧縮機能を提供する具象デコレータ
 class RLEEncoder: public Encoder
 {
-    friend WriteFactory;
+    friend class WriteFactory;
     explicit RLEEncoder(Write* arg): Encoder(arg){}
 
 public:
