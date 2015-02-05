@@ -57,7 +57,7 @@ protected:
 //
 class ReadBinaryFile: public ReadFile
 {
-    friend ReadFactory;
+    friend class ReadFactory;
     ReadBinaryFile(const int& arg_size_of_datatype): need_endian_convert(false),
                                                      size_of_datatype(arg_size_of_datatype){}
 
@@ -116,7 +116,7 @@ protected:
 //! zip形式による伸張機能を提供する具象デコレータ
 class ZipDecoder: public Decoder
 {
-    friend ReadFactory;
+    friend class ReadFactory;
     explicit ZipDecoder(Read* arg): Decoder(arg){}
 
 public:
@@ -126,7 +126,7 @@ public:
 //! fpzip形式による伸張機能を提供する具象デコレータ
 class FpzipDecoder: public Decoder
 {
-    friend ReadFactory;
+    friend class ReadFactory;
     explicit FpzipDecoder(Read* arg, bool is_dp, int arg_vlen): Decoder(arg),
                                                                 dp(0),
                                                                 vlen(arg_vlen)
@@ -145,7 +145,7 @@ private:
 //! RLEアルゴリズムによる伸張機能を提供する具象デコレータ
 class RLEDecoder: public Decoder
 {
-    friend ReadFactory;
+    friend class ReadFactory;
     explicit RLEDecoder(Read* arg): Decoder(arg){}
 
 public:
