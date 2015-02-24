@@ -29,7 +29,7 @@ find_path(TextParser_INCLUDE_DIR
 
 # Finally the library itself
 find_library(TextParser_LIBRARY
-  NAMES TP
+  NAMES TPmpi
   PATHS ${TP_ROOT} ${TextParser_PKGCONF_LIBRARY_DIRS}
   PATH_SUFFIXES lib 
 )

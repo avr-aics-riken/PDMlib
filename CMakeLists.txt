@@ -25,8 +25,8 @@ option(build_tests "build test program for PDMlib" OFF)
 message( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
 message( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 message( STATUS "Destination PATH: " ${CMAKE_INSTALL_PREFIX})
-message( STATUS "build sample program: " build_samples)
-message( STATUS "build test program: " build_tests)
+message( STATUS "build sample program: " ${build_samples})
+message( STATUS "build test program: " ${build_tests})
 
 
 ##############################################
@@ -82,14 +82,17 @@ find_package (Zoltan     REQUIRED)
 ##############################################
 # include PATHの設定(ライブラリ用)
 ##############################################
-include_directories( ${PROJECT_SOURCE_DIR}/include
+set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
                     ${LIB_SRC_DIR}
                     ${ZLIB_INCLUDE_DIRS}
-                    ${HDF5_INCLUDE_DIRS}
                     ${FPZIP_INCLUDE_DIRS}
                     ${Zoltan_INCLUDE_DIRS}
                     ${TextParser_INCLUDE_DIRS}
                    )
+if (HDF5_FOUND )
+set (INCLUDE_DIRS "${INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}")
+endif(HDF5_FOUND)
+include_directories(${INCLUDE_DIRS})
 
 
 ##############################################
@@ -108,20 +111,22 @@ install (FILES ${PROJECT_SOURCE_DIR}/cmake/FindPDMlib.cmake   DESTINATION share)
 # ツール類のビルド&インストール
 ##############################################
 
+install (PROGRAMS ${PROJECT_SOURCE_DIR}/tools/stage.py DESTINATION bin)
+
 set (MANDATORY_LIBS PDM ${TextParser_LIBRARIES} ${ZLIB_LIBRARIES} ${FPZIP_LIBRARIES} ${Zoltan_LIBRARIES})
 
-# ビルド対象の指定
+# FV14用コンバータ
 add_executable(FV14Converter    ${FV14CONVERTER_SRC})
-add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
-
-#リンクするライブラリの指定
 target_link_libraries(FV14Converter   ${MANDATORY_LIBS})
-target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
-
-# インストール
-install (PROGRAMS ${PROJECT_SOURCE_DIR}/tools/stage.py DESTINATION bin)
 install (TARGETS  FV14Converter    DESTINATION bin)
+
+# HDF5用コンバータ
+if (HDF5_FOUND )
+add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
+target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
 install (TARGETS  H5PartConverter  DESTINATION bin)
+endif(HDF5_FOUND)
+
 
 ##############################################
 # サンプルのビルド

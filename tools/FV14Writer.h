@@ -88,9 +88,9 @@ void WriteVectorNIJK(std::ofstream& out, T** ptr, const size_t& length)
     float* write_buff_z = new float[num_particle];
     for(int i = 0; i < num_particle; ++i)
     {
-        write_buff_x[i] = (float)((*ptr)[i]);
-        write_buff_y[i] = (float)((*ptr)[i+1]);
-        write_buff_z[i] = (float)((*ptr)[i+2]);
+        write_buff_x[i] = (float)((*ptr)[3*i+0]);
+        write_buff_y[i] = (float)((*ptr)[3*i+1]);
+        write_buff_z[i] = (float)((*ptr)[3*i+2]);
     }
     WriteArray(out, write_buff_x, num_particle);
     WriteArray(out, write_buff_y, num_particle);

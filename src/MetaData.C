@@ -142,7 +142,7 @@ int MetaData::Read()
     while(entry != NULL)
     {
         std::string filename(entry->d_name);
-        if(filename.find("BaseFileName") != std::string::npos)
+        if(filename.find(BaseFileName) != std::string::npos)
         {
             //後ろから順にピリオドまでを削除
             //後ろから順に_までを取り出す
