@@ -89,10 +89,10 @@ set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
                     ${Zoltan_INCLUDE_DIRS}
                     ${TextParser_INCLUDE_DIRS}
                    )
-if (HDF5_FOUND )
-set (INCLUDE_DIRS "${INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}")
-endif(HDF5_FOUND)
 include_directories(${INCLUDE_DIRS})
+if (HDF5_FOUND )
+include_directories(${HDF5_INCLUDE_DIRS})
+endif(HDF5_FOUND)
 
 
 ##############################################
