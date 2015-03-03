@@ -39,11 +39,11 @@ struct ContainerPointer
 class PDMlib::Impl
 {
 public:
-    Impl(): Initialized(false),
-            FirstCall(true),
-            WriteDFI_FileName("PDMlib.dfi"),
-            rMetaData(NULL),
-            wMetaData(NULL)
+    Impl() : Initialized(false),
+        FirstCall(true),
+        WriteDFI_FileName("PDMlib.dfi"),
+        rMetaData(NULL),
+        wMetaData(NULL)
     {}
 
     ~Impl()
@@ -60,7 +60,7 @@ public:
 
     void Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string&  ReadMetaDataFile)
     {
-        if(Initialized) return;
+        if(Initialized)return;
 
         if(!WriteMetaDataFile.empty())
         {
@@ -105,7 +105,7 @@ public:
 
         static_my_rank = wMetaData->GetMyRank();
 
-        Initialized = true;
+        Initialized    = true;
     }
 
     //! コンテナの型がメタデータファイルに書かれた型と適合するか確認する
@@ -116,17 +116,17 @@ public:
         rMetaData->GetContainerInfo(name, &container_info);
         if(container_info.Type == INT32)
         {
-            if(typeid(T) != typeid(int)) return false;
+            if(typeid(T) != typeid(int))return false;
         }else if(container_info.Type == uINT32){
-            if(typeid(T) != typeid(unsigned int)) return false;
+            if(typeid(T) != typeid(unsigned int))return false;
         }else if(container_info.Type == INT64){
-            if(typeid(T) != typeid(long)) return false;
+            if(typeid(T) != typeid(long))return false;
         }else if(container_info.Type == uINT64){
-            if(typeid(T) != typeid(unsigned long)) return false;
+            if(typeid(T) != typeid(unsigned long))return false;
         }else if(container_info.Type == FLOAT){
-            if(typeid(T) != typeid(float)) return false;
+            if(typeid(T) != typeid(float))return false;
         }else if(container_info.Type == DOUBLE){
-            if(typeid(T) != typeid(double)) return false;
+            if(typeid(T) != typeid(double))return false;
         }else{
             return false;
         }
@@ -163,9 +163,9 @@ public:
         {
             std::vector<std::string> tmp_filenames;
             ListDirectoryContents("./", &tmp_filenames);
-            std::string              tail1("_");
+            std::string   tail1("_");
             tail1 += to_string(time_step);
-            ContainerInfo            container_info;
+            ContainerInfo container_info;
             rMetaData->GetContainerInfo(name, &container_info);
             tail1 += "."+container_info.Suffix;
             for(std::vector<std::string>::iterator it = tmp_filenames.begin(); it != tmp_filenames.end(); ++it)
@@ -207,7 +207,7 @@ public:
         {
             size_t tmp;
             char** read_buff = new char*;
-            *read_buff = NULL;
+            *read_buff   = NULL;
             size_t read_size = reader->read((*it).c_str(), tmp, read_buff);
             *total_size += read_size;
             buffers->push_back(std::make_pair(read_size, *read_buff));
@@ -387,8 +387,8 @@ public:
         MPI_Barrier(wMetaData->GetComm()); // 送信しないRankが通り抜けてしまうので、この位置でのBarrierは必須
 
         // 受信したデータ+転送しなかったデータのサイズで領域を確保
-        int room = *ContainerLength-index;   // 送信データ数(=確保済領域の空きサイズを計算)
-        *ContainerLength -= room;            // 送信したデータ数をContainerLengthから引く
+        int room           = *ContainerLength-index; // 送信データ数(=確保済領域の空きサイズを計算)
+        *ContainerLength -= room;                    // 送信したデータ数をContainerLengthから引く
         int sum_recv_count = 0;
         for(int i = 0; i < num_procs; i++)
         {
@@ -438,17 +438,17 @@ public:
     {
         if((container)->Type == INT32)
         {
-            migrate_container((int**)&((container)->buff),           &(container->ContainerLength), recv_counts, container->nComp, export_objs);
+            migrate_container((int**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }else if((container)->Type == uINT32){
-            migrate_container((unsigned int**)&((container)->buff),  &(container->ContainerLength), recv_counts, container->nComp, export_objs);
+            migrate_container((unsigned int**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }else if((container)->Type == INT64){
-            migrate_container((long**)&((container)->buff),          &(container->ContainerLength), recv_counts, container->nComp, export_objs);
+            migrate_container((long**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }else if((container)->Type == uINT64){
             migrate_container((unsigned long**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }else if((container)->Type == FLOAT){
-            migrate_container((float**)&((container)->buff),         &(container->ContainerLength), recv_counts, container->nComp, export_objs);
+            migrate_container((float**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }else if((container)->Type == DOUBLE){
-            migrate_container((double**)&((container)->buff),        &(container->ContainerLength), recv_counts, container->nComp, export_objs);
+            migrate_container((double**)&((container)->buff), &(container->ContainerLength), recv_counts, container->nComp, export_objs);
         }
         container->size = (container->ContainerLength)*GetSize((container)->Type);
     }
@@ -508,12 +508,12 @@ public:
         // parameter setting
         zz->Set_Param("NUM_GID_ENTRIES", "2");  //global id としてunsigned integer 2つを使用する
         zz->Set_Param("NUM_LID_ENTRIES", "1");  //local id としてunsigned integer 1つを使用する (default)
-        zz->Set_Param("DEBUG_LEVEL", "0");      //debug level default値は1
-        zz->Set_Param("OBJ_WEIGHT_DIM", "0");   //ロードバランス計算時にオブジェクトの重みをつけない (default)
+        zz->Set_Param("DEBUG_LEVEL",     "0");  //debug level default値は1
+        zz->Set_Param("OBJ_WEIGHT_DIM",  "0");  //ロードバランス計算時にオブジェクトの重みをつけない (default)
 
-        zz->Set_Param("LB_METHOD", "RCB");      // パーティショニングのアルゴリズム (default)
-        zz->Set_Param("RETURN_LISTS", "ALL");   // import listとexport listの両方を返す (default)
-        zz->Set_Param("IMBALANCE_TOL", "1.1");  // 110%以下のインバランスは許容する (default)
+        zz->Set_Param("LB_METHOD",       "RCB"); // パーティショニングのアルゴリズム (default)
+        zz->Set_Param("RETURN_LISTS",    "ALL"); // import listとexport listの両方を返す (default)
+        zz->Set_Param("IMBALANCE_TOL",   "1.1"); // 110%以下のインバランスは許容する (default)
 
         // register query functions
         zz->Set_Num_Obj_Fn(get_num_object, CoordinateContainer->buff);
@@ -521,25 +521,25 @@ public:
         zz->Set_Num_Geom_Fn(get_num_geometry, CoordinateContainer->buff);
         Set_Geom_Multi_Fn(zz);
 
-        int           changes;
-        int           numGidEntries;
-        int           numLidEntries;
-        int           numImport;
+        int changes;
+        int numGidEntries;
+        int numLidEntries;
+        int numImport;
         ZOLTAN_ID_PTR importGlobalIds;
         ZOLTAN_ID_PTR importLocalIds;
         int*          importProcs;
         int*          importToPart;
-        int           numExport;
+        int numExport;
         ZOLTAN_ID_PTR exportGlobalIds;
         ZOLTAN_ID_PTR exportLocalIds;
         int*          exportProcs;
         int*          exportToPart;
 
-        int           rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
-                                            numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
-                                            numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
-        int           max_rc;
-        int           min_rc;
+        int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
+                                  numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
+                                  numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
+        int max_rc;
+        int min_rc;
         MPI_Allreduce(&rc, &max_rc, 1, MPI_INT, MPI_MAX, comm);
         MPI_Allreduce(&rc, &min_rc, 1, MPI_INT, MPI_MIN, comm);
         if(max_rc != ZOLTAN_OK || min_rc != ZOLTAN_OK)
@@ -591,7 +591,7 @@ public:
 
     static void get_geometry_list_int(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        int* coord = (int*)data;
+        int* coord  = (int*)data;
         *ierr = ZOLTAN_OK;
         int  length = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
@@ -604,7 +604,7 @@ public:
     {
         unsigned int* coord = (unsigned int*)data;
         *ierr = ZOLTAN_OK;
-        int           length = CoordinateContainer->ContainerLength;
+        int length          = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
         {
             geom_vec[i] = (double)coord[i];
@@ -613,7 +613,7 @@ public:
 
     static void get_geometry_list_long(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        long* coord = (long*)data;
+        long* coord  = (long*)data;
         *ierr = ZOLTAN_OK;
         int   length = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
@@ -626,7 +626,7 @@ public:
     {
         unsigned long* coord = (unsigned long*)data;
         *ierr = ZOLTAN_OK;
-        int            length = CoordinateContainer->ContainerLength;
+        int length           = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
         {
             geom_vec[i] = (double)coord[i];
@@ -635,7 +635,7 @@ public:
 
     static void get_geometry_list_float(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        float* coord = (float*)data;
+        float* coord  = (float*)data;
         *ierr = ZOLTAN_OK;
         int    length = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
@@ -646,7 +646,7 @@ public:
 
     static void get_geometry_list_double(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        double* coord = (double*)data;
+        double* coord  = (double*)data;
         *ierr = ZOLTAN_OK;
         int     length = CoordinateContainer->ContainerLength;
         for(int i = 0; i < length; i++)
@@ -657,7 +657,7 @@ public:
 
     static void get_geometry_list_int_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        int* coord = (int*)data;
+        int* coord  = (int*)data;
         *ierr = ZOLTAN_OK;
         int  length = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
@@ -672,7 +672,7 @@ public:
     {
         unsigned int* coord = (unsigned int*)data;
         *ierr = ZOLTAN_OK;
-        int           length = (CoordinateContainer->ContainerLength)/3;
+        int length          = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
         {
             geom_vec[3*i]   = (double)coord[i];
@@ -683,7 +683,7 @@ public:
 
     static void get_geometry_list_long_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        long* coord = (long*)data;
+        long* coord  = (long*)data;
         *ierr = ZOLTAN_OK;
         int   length = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
@@ -698,7 +698,7 @@ public:
     {
         unsigned long* coord = (unsigned long*)data;
         *ierr = ZOLTAN_OK;
-        int            length = (CoordinateContainer->ContainerLength)/3;
+        int length           = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
         {
             geom_vec[3*i]   = (double)coord[i];
@@ -709,7 +709,7 @@ public:
 
     static void get_geometry_list_float_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        float* coord = (float*)data;
+        float* coord  = (float*)data;
         *ierr = ZOLTAN_OK;
         int    length = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
@@ -722,7 +722,7 @@ public:
 
     static void get_geometry_list_double_ijkn(void* data, int num_gid_entries, int num_lid_entries, int num_obj, ZOLTAN_ID_PTR global_ids, ZOLTAN_ID_PTR local_ids, int num_dim, double* geom_vec, int* ierr)
     {
-        double* coord = (double*)data;
+        double* coord  = (double*)data;
         *ierr = ZOLTAN_OK;
         int     length = (CoordinateContainer->ContainerLength)/3;
         for(int i = 0; i < length; i++)
@@ -762,37 +762,37 @@ public:
 
     //! 自Rankのランク番号
     //
-    static int                  static_my_rank;
+    static int static_my_rank;
 
     //! RegisterContainer()で渡されたポインタを登録するテーブル
     std::set<ContainerPointer*> ContainerTable;
 
     //! ファイル出力バッファのサイズ 単位はMiB
-    int                         BufferSize;
+    int BufferSize;
 
     //! ファイル出力をバッファリングする回数
-    int                         MaxBufferingTime;
+    int MaxBufferingTime;
 
     //! 読み出すDFIファイルの名前
-    std::string                 ReadDFI_FileName;
+    std::string ReadDFI_FileName;
 
     //! 書きみ出すDFIファイルの名前
-    std::string                 WriteDFI_FileName;
+    std::string WriteDFI_FileName;
 
     //! 初期化済を示すフラグ
-    bool                        Initialized;
+    bool Initialized;
 
     //! Writeの呼び出しが1回目か2回目以降かを示すフラグ
-    bool                        FirstCall;
+    bool FirstCall;
 
     //! ファイル入力用のメタデータオブジェクトへのポインタ
-    MetaData*                   rMetaData;
+    MetaData* rMetaData;
 
     //! ファイル出力用のメタデータオブジェクトへのポインタ
-    MetaData*                   wMetaData;
+    MetaData* wMetaData;
 };
 
 ContainerPointer* PDMlib::Impl::CoordinateContainer;
-int               PDMlib::Impl::static_my_rank;
+int PDMlib::Impl::static_my_rank;
 } //end of namespace
 #endif

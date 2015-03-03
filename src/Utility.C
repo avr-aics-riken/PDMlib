@@ -13,7 +13,8 @@
 #include <cstdlib>
 #include <set>
 #include <string>
-#include <dirent.h>
+#include <glob.h>
+#include <mpi.h>
 #include "Utility.h"
 
 namespace
@@ -24,14 +25,14 @@ namespace
 // 念の為この実装にしている。
 int read_nth_byte(const size_t& index)
 {
-    const char    filename[] = "PDMlib_util_temp\0";
-    if(index < 0 || index >= sizeof(int)) return -1;
+    const char filename[] = "PDMlib_util_temp\0";
+    if(index < 0 || index >= sizeof(int))return -1;
 
-    int           i = 1;
+    int i = 1;
     std::ofstream out(filename, std::ios::binary);
     out.write((char*)&i, sizeof(int));
     out.close();
-    char          c[sizeof(int)];
+    char c[sizeof(int)];
     std::ifstream in(filename, std::ios::binary);
     in.read(c, sizeof(int));
     in.close();
@@ -76,31 +77,24 @@ int GetStartIndex(const int& N, const int& NumProc, const int& MyRank)
     return index;
 }
 
-void ListDirectoryContents(std::string dir_name, std::vector<std::string>* filenames)
+void ListDirectoryContents(const std::string& dir_name, std::vector<std::string>* filenames, const std::string& wild_card)
 {
     filenames->clear();
-    DIR* dp;
-    if((dp = opendir(dir_name.c_str())) == NULL)
+    std::string tmp = dir_name+"/"+wild_card;
+    glob_t      result;
+    glob(tmp.c_str(), GLOB_MARK || GLOB_NOSORT || GLOB_NOCHECK || GLOB_TILDE, NULL, &result);
+    for(int i = 0; i < result.gl_pathc; i++)
     {
-        std::cerr<<"Couldn't open current directory!"<<std::endl;
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        filenames->push_back(result.gl_pathv[i]);
     }
-    struct dirent* entry;
-    entry = readdir(dp);
-    while(entry != NULL)
-    {
-        std::string filename(entry->d_name);
-        filenames->push_back(filename);
-        entry = readdir(dp);
-    }
-    closedir(dp);
+    globfree(&result);
 }
 
 bool is_all_digit(const std::string& str)
 {
     for(std::string::const_iterator it = str.begin(); it != str.end(); ++it)
     {
-        if(!isdigit(*it)) return false;
+        if(!isdigit(*it))return false;
     }
     return true;
 }
@@ -142,10 +136,10 @@ int get_region_number(const std::string& filename)
     return stoi(str_region_number);
 }
 
-void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name, const int& start_time, const int& end_time)
+void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name, const int& start_time, const int& end_time, const std::string& wild_card)
 {
     std::vector<std::string> filenames;
-    ListDirectoryContents(dir_name, &filenames);
+    ListDirectoryContents(dir_name, &filenames, wild_card);
     for(std::vector<std::string>::iterator it = filenames.begin(); it != filenames.end(); ++it)
     {
         if((*it).find(keyword) != std::string::npos)

@@ -21,18 +21,17 @@ namespace H5PartWriter
 //! H5Part形式でファイル出力を行う関数群
 class H5PartWriter
 {
-    H5PartFile* file; 
+    H5PartFile* file;
 
 public:
     H5PartWriter(const std::string& filename)
     {
-        file= H5PartOpenFile(filename.c_str(), H5PART_WRITE);
+        file = H5PartOpenFile(filename.c_str(), H5PART_WRITE);
         H5PartWriteFileAttribString(file, "Origin", "Test Strings for H5PartWriteFileAttribString");
     }
 
     ~H5PartWriter()
-    {
-    }
+    {}
 
     //! スカラー量を出力
     template<typename T>
@@ -75,31 +74,31 @@ public:
     template<typename T>
     void WriteVectorNIJK(T** ptr, const size_t& length, std::string& container_name)
     {
-        size_t      num_particle = length/3;
-        std::string name         = container_name+"x";
-            WriteScalar(ptr, num_particle, name, 3, 0);
+        size_t num_particle = length/3;
+        std::string name    = container_name+"x";
+        WriteScalar(ptr, num_particle, name, 3, 0);
         name = container_name+"y";
-            WriteScalar(ptr, num_particle, name, 3, 1);
+        WriteScalar(ptr, num_particle, name, 3, 1);
         name = container_name+"z";
-            WriteScalar(ptr, num_particle, name, 3, 2);
+        WriteScalar(ptr, num_particle, name, 3, 2);
     }
 
 //! IJKNで格納されているベクトル量を出力
     template<typename T>
     void WriteVectorIJKN(T** ptr, const size_t& length, std::string& container_name)
     {
-        size_t      num_particle = length/3;
+        size_t num_particle = length/3;
 
-        T*          ptr2 = *ptr;
-        std::string name = container_name+"x";
+        T* ptr2             = *ptr;
+        std::string name    = container_name+"x";
         WriteScalar(&ptr2, num_particle, name);
 
-        ptr2+=num_particle;
-        name=container_name+"y";
+        ptr2 += num_particle;
+        name  = container_name+"y";
         WriteScalar(&ptr2, num_particle, name);
 
-        ptr2+=num_particle;
-        name=container_name+"z";
+        ptr2 += num_particle;
+        name  = container_name+"z";
         WriteScalar(&ptr2, num_particle, name);
     }
 
@@ -116,7 +115,7 @@ public:
         std::string label(container_info.Name);
         if(coordinate_flag)
         {
-            label="";
+            label = "";
         }
 
         if(container_info.nComp == 1)
@@ -130,7 +129,7 @@ public:
                 H5PartWriter::WriteVectorIJKN(ptr, length, label);
             }
         }
-        delete [] *ptr;
+        delete[] *ptr;
     }
 
     void ReadAndWriteContainerSelector(PDMlib::ContainerInfo container_info, const int& time_step, const bool& coordinate_flag)
@@ -162,8 +161,6 @@ public:
         H5PartSetStep(file, time_step);
         H5PartSetNumParticles(file, count);
     }
-
-
 };
 } // end of namespace
 #endif

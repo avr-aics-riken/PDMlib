@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdarg.h>
- 
+
 extern "C" {
 #include <hdf5.h>
 }
@@ -33,24 +33,23 @@ namespace H5PartWriter
 //! H5Part形式でファイル出力を行う関数群
 class H5PartWriter
 {
-    hid_t         timegroup;
-    hid_t         shape;
-    hid_t         f;
+    hid_t timegroup;
+    hid_t shape;
+    hid_t f;
     std::string   filename;
 
     std::ofstream out;
 
 public:
-    H5PartWriter(const std::string& arg_filename): shape(H5S_ALL),
-                                                   filename(arg_filename)
+    H5PartWriter(const std::string& arg_filename) : shape(H5S_ALL),
+        filename(arg_filename)
     {
         hid_t access_prop = H5Pcreate(H5P_FILE_ACCESS);
         f = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access_prop);
     }
 
     ~H5PartWriter()
-    {
-    }
+    {}
 
 //! スカラー量を出力
     template<typename T>
@@ -93,32 +92,32 @@ public:
     template<typename T>
     void WriteVectorNIJK(T** ptr, const size_t& length, std::string& container_name)
     {
-        size_t      num_particle = length/3;
-        std::string name         = container_name+"x";
-            WriteScalar(ptr, num_particle, name, 3, 0);
+        size_t num_particle = length/3;
+        std::string name    = container_name+"x";
+        WriteScalar(ptr, num_particle, name, 3, 0);
         name = container_name+"y";
-            WriteScalar(ptr, num_particle, name, 3, 1);
+        WriteScalar(ptr, num_particle, name, 3, 1);
         name = container_name+"z";
-            WriteScalar(ptr, num_particle, name, 3, 2);
+        WriteScalar(ptr, num_particle, name, 3, 2);
     }
 
 //! IJKNで格納されているベクトル量を出力
     template<typename T>
     void WriteVectorIJKN(T** ptr, const size_t& length, std::string& container_name)
     {
-        size_t      num_particle = length/3;
+        size_t num_particle = length/3;
 
-        T*          ptr2 = *ptr;
-        std::string name = container_name+"x";
-            WriteScalar(&ptr2, num_particle, name);
+        T* ptr2             = *ptr;
+        std::string name    = container_name+"x";
+        WriteScalar(&ptr2, num_particle, name);
 
         ptr2 += num_particle;
         name  = container_name+"y";
-            WriteScalar(&ptr2, num_particle, name);
+        WriteScalar(&ptr2, num_particle, name);
 
         ptr2 += num_particle;
         name  = container_name+"z";
-            WriteScalar(&ptr2, num_particle, name);
+        WriteScalar(&ptr2, num_particle, name);
     }
 
     template<typename T>
@@ -190,22 +189,21 @@ public:
     }
 
 private:
-    void write_data(const char* name, /*!< IN: Name to associate array with */
-                     const void* array, /*!< IN: Array to commit to disk */
-                     const hid_t type /*!< IN: Type of data */
-                     )
+    void write_data(const char* name,  /*!< IN: Name to associate array with */
+                    const void* array, /*!< IN: Array to commit to disk */
+                    const hid_t type   /*!< IN: Type of data */
+                    )
     {
         hid_t dataset_id;
 
         char  name2[64];
         strncpy(name2, name, 64);
-        name2[63] = '\0';
+        name2[63]  = '\0';
 
         dataset_id = H5Dcreate(timegroup, name2, type, shape, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(dataset_id, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, array);
         H5Dclose(dataset_id);
     }
-
 };
 } // end of namespace
 #endif

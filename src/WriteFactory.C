@@ -26,8 +26,8 @@ Write* WriteFactory::create(const std::string& decorator, const std::string& typ
         writer = new WriteBinaryFile;
 
         //decoratorで指定された内容にしたがってEncoderを追加する
-        std::istringstream       iss(decorator);
-        std::string              piece;
+        std::istringstream iss(decorator);
+        std::string piece;
         std::vector<std::string> decorator_container;
         while(std::getline(iss, piece, '+'))
         {

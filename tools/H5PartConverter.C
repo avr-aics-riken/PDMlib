@@ -62,17 +62,17 @@ void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::s
 int main(int argc, char* argv[])
 {
     MPI_Init(&argc, &argv);
-    int      nproc, myrank;
+    int nproc, myrank;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_size(comm, &nproc);
     MPI_Comm_rank(comm, &myrank);
 
-    int           start_time = -1;
-    int           end_time   = INT_MAX;
-    std::string   dir_name("./");
-    std::string   dfi_filename;
-    std::string   coordinate("Coordinate");
-    bool          with_bbox = false;
+    int start_time = -1;
+    int end_time   = INT_MAX;
+    std::string dir_name("./");
+    std::string dfi_filename;
+    std::string coordinate("Coordinate");
+    bool with_bbox = false;
     ComandLineParser(argc, argv, &start_time, &end_time, &dir_name, &dfi_filename, &coordinate);
     std::ifstream ifs(dfi_filename.c_str());
     if(ifs.fail())
@@ -90,15 +90,15 @@ int main(int argc, char* argv[])
     std::vector<std::string> filenames;
     PDMlib::ListDirectoryContents(dir_name, &filenames);
 
-    const std::string        base_filename = PDMlib::PDMlib::GetInstance().GetBaseFileName();
+    const std::string base_filename = PDMlib::PDMlib::GetInstance().GetBaseFileName();
     //TODO suffix listを取得し、filenamesから関係の無い拡張子のファイルを削除する
     //ListDirectoryContentsを拡張する形で実装する
 
     std::set<int> time_steps;
     PDMlib::MakeTimeStepList(&time_steps, base_filename, dir_name, start_time, end_time);
-    int           min_timestep = *time_steps.begin();
+    int min_timestep  = *time_steps.begin();
 
-    int           minimum_nproc = INT_MAX;
+    int minimum_nproc = INT_MAX;
     for(std::set<int>::iterator it_time = time_steps.begin(); it_time != time_steps.end(); ++it_time)
     {
         std::set<int> ranks;
@@ -127,8 +127,8 @@ int main(int argc, char* argv[])
         std::vector<PDMlib::ContainerInfo>& containers = pdmlib.GetContainerInfo();
 
         // 座標コンテナの名前が正しく指定されているか確認
-        bool                                coord_found = false;
-        PDMlib::ContainerInfo               coord_container;
+        bool coord_found = false;
+        PDMlib::ContainerInfo coord_container;
         for(std::vector<PDMlib::ContainerInfo>::iterator it = containers.begin(); it != containers.end(); ++it)
         {
             if((*it).Name == coordinate)
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
         {
             int    time_step = *it_time_step;
             // 粒子数を取得するために、座標コンテナを読み込む
-            size_t length = -1;
+            size_t length    = -1;
             if(coord_container.Type == PDMlib::FLOAT)
             {
                 float* ptr = NULL;

@@ -18,16 +18,16 @@ namespace PDMlib
 class MetaData
 {
 public:
-    MetaData(std::string arg_filename): Version("0.1"),
-                                        Comm(MPI_COMM_WORLD),
-                                        Communicator("MPI_COMM_WORLD"),
-                                        ReadOnly(false),
-                                        HeaderOutput(false),
-                                        FileName(arg_filename)
+    MetaData(std::string arg_filename) : Version("0.1"),
+        Comm(MPI_COMM_WORLD),
+        Communicator("MPI_COMM_WORLD"),
+        ReadOnly(false),
+        HeaderOutput(false),
+        FileName(arg_filename)
     {
         Endian = GetEndian();
-        MPI_Comm_size(MPI_COMM_WORLD, &NumCommWorldProc);
-        MPI_Comm_rank(MPI_COMM_WORLD, &MyRank);
+        MPI_Comm_size(Comm, &NumCommWorldProc);
+        MPI_Comm_rank(Comm, &MyRank);
         NumProc = NumCommWorldProc;
         for(int i = 0; i < 6; i++)
         {
@@ -69,7 +69,7 @@ public:
     void SetReadWrite(void){this->ReadOnly = false;}
 
     //! 対応するフィールドデータのベースファイル名を設定する
-    void SetBaseFileName(const std::string filename){if(!ReadOnly) this->BaseFileName = filename;}
+    void SetBaseFileName(const std::string filename){if(!ReadOnly)this->BaseFileName = filename;}
 
     //! 対応するフィールドデータのベースファイル名を取得する
     std::string GetBaseFileName(void) const {return BaseFileName;}
@@ -96,20 +96,20 @@ public:
     }
 
     //! 粒子計算に使っているコミュニケータを文字列として設定する
-    void SetCommunicator(const std::string& Communicator){if(!ReadOnly) this->Communicator = Communicator;}
+    void SetCommunicator(const std::string& Communicator){if(!ReadOnly)this->Communicator = Communicator;}
 
     //! 粒子計算に使っているコミュニケータをMPI_Comm型の変数として設定する
     void SetComm(const MPI_Comm& Comm)
     {
-        if(ReadOnly) return;
+        if(ReadOnly)return;
 
         this->Comm = Comm;
-        MPI_Comm_size(Comm, &NumProc);
-        MPI_Comm_rank(Comm, &MyRank);
+        MPI_Comm_size(this->Comm, &NumProc);
+        MPI_Comm_rank(this->Comm, &MyRank);
     }
 
     //! コンテナ定義を追加する
-    void AddContainer(const ContainerInfo& Container){if(!ReadOnly) Containers.push_back(Container);}
+    void AddContainer(const ContainerInfo& Container){if(!ReadOnly)Containers.push_back(Container);}
 
     //! 設定されたコンテナ定義の数を取得する
     int GetNumContainers(void) const {return Containers.size();}
@@ -121,11 +121,10 @@ public:
     bool GetContainerInfo(const std::string& name, ContainerInfo* container_info) const;
 
     //! 引数で指定された名前のコンテナがあるかどうか確認する
-    bool FindContainerInfo(const std::string& name
-                           ) const;
+    bool FindContainerInfo(const std::string& name) const;
 
     //! 単位系の定義を追加する
-    void AddUnit(const UnitElem& Unit){if(!ReadOnly) Units.push_back(Unit);}
+    void AddUnit(const UnitElem& Unit){if(!ReadOnly)Units.push_back(Unit);}
 
     //! 単位系の定義を取得する
     void GetUnitInfo(std::vector<UnitElem>& Units) const {Units = this->Units;}
@@ -161,15 +160,14 @@ public:
 
 private:
     //! 実行中の処理系におけるエンディアンを判定する
-    std::string GetEndian(void
-                          ) const;
+    std::string GetEndian(void) const;
 
     //! このタイムステップのタイムスライス情報が1つでも書かれているかどうか調べる
     bool is_never_written(void)
     {
         for(std::map<std::string, bool>::iterator it = Written.begin(); it != Written.end(); ++it)
         {
-            if((*it).second) return false;
+            if((*it).second)return false;
         }
         return true;
     }
@@ -179,19 +177,19 @@ private:
     {
         for(std::map<std::string, bool>::iterator it = Written.begin(); it != Written.end(); ++it)
         {
-            if(!(*it).second) return false;
+            if(!(*it).second)return false;
         }
         return true;
     }
 
     //! PDMlibのバージョン
-    std::string                Version;
+    std::string Version;
 
     //! フィールドデータのコンテナ
     std::vector<ContainerInfo> Containers;
 
     //! 単位系の情報
-    std::vector<UnitElem>      Units;
+    std::vector<UnitElem> Units;
 
     //! 解析領域のBoundingBox
     //
@@ -213,46 +211,46 @@ private:
     std::string Endian;
 
     //! MPI_COMM_WROLD内のプロセス数
-    int         NumCommWorldProc;
+    int NumCommWorldProc;
 
     //! PDMlibを呼び出すプロセスが属するコミュニケータ
     //
     // Comm内の全プロセスからPDMlibが呼ばれることを仮定しているが
     // 特にチェックはしていないので、一部のプロセスしか呼ばなかった場合も動作する
-    MPI_Comm                    Comm;
+    MPI_Comm Comm;
 
     //! Comm内のプロセス数
-    int                         NumProc;
+    int NumProc;
 
     //! Comm内でのランク番号
-    int                         MyRank;
+    int MyRank;
 
     //! Commを識別するためのラベル
-    std::string                 Communicator;
+    std::string Communicator;
 
     //! 最新の出力を行なったタイムステップ
-    int                         TimeStep;
+    int TimeStep;
 
     //! 最新の出力を行なった時刻
-    double                      Time;
+    double Time;
 
     //! 最新の出力されたコンテナに含まれる粒子数
-    long                        NumParticle;
+    long NumParticle;
 
     //! タイムスライス情報を出力した回数
-    int                         NumOutputTimeSlice;
+    int NumOutputTimeSlice;
 
     //! 現在のタイムステップで各コンテナが出力済かどうかを記録するテーブル
     std::map<std::string, bool> Written;
 
     //! 各変数の値をReadOnlyに設定するフラグ
-    bool                        ReadOnly;
+    bool ReadOnly;
 
     //! DFIファイルのファイル名
-    std::string                 FileName;
+    std::string FileName;
 
     //! タイムスライス情報のヘッダ出力を行なったかどうかのフラグ
-    bool                        HeaderOutput;
+    bool HeaderOutput;
 
     //! フィールドデータのベースファイル名
     //

@@ -26,11 +26,11 @@ Read* ReadFactory::create(const std::string& decorator, const std::string& type,
         size_of_type = 8;
     }
 
-    Read*                    reader = new ReadBinaryFile(size_of_type);
+    Read* reader = new ReadBinaryFile(size_of_type);
 
     //decoratorで指定された内容にしたがってDecoderを追加する
-    std::istringstream       iss(decorator);
-    std::string              piece;
+    std::istringstream iss(decorator);
+    std::string piece;
     std::vector<std::string> decorator_container;
     while(std::getline(iss, piece, '+'))
     {
