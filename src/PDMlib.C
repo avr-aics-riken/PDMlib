@@ -7,6 +7,8 @@
  *
  */
 
+#include "PDMlib.h"
+
 #include <dirent.h>
 #include <typeinfo>
 #include <string>
@@ -15,7 +17,6 @@
 #include <set>
 #include <algorithm>
 
-#include "PDMlib.h"
 #include "PDMlibImpl.h"
 #include "Write.h"
 #include "Read.h"

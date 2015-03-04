@@ -9,9 +9,9 @@
 
 #ifndef PDMLIB_PDMLIB_H
 #define PDMLIB_PDMLIB_H
+#include <mpi.h>
 #include <string>
 #include <vector>
-#include <mpi.h>
 
 namespace PDMlib
 {

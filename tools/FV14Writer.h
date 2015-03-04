@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstring>
 namespace FV14Writer
 {
 //! FV14 形式でファイル出力を行う関数群
