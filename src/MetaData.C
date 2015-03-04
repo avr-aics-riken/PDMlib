@@ -7,14 +7,15 @@
  *
  */
 
+#include "PDMlib.h"
+#include "TextParser.h"
+
 #include <dirent.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <list>
 #include <string>
-#include "TextParser.h"
-#include "PDMlib.h"
 #include "Utility.h"
 #include "MetaData.h"
 #include "TPWriteHelper.h"

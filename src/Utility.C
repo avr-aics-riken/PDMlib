@@ -7,13 +7,13 @@
  *
  */
 
+#include <mpi.h>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <set>
 #include <string>
 #include <dirent.h>
-#include <mpi.h>
 #include "Utility.h"
 
 namespace

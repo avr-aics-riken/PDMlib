@@ -7,12 +7,12 @@
  *
  */
 
+#include <mpi.h>
 #include <set>
 #include <climits>
 #include <vector>
 #include <unistd.h>
 #include <sstream>
-#include <mpi.h>
 #include "PDMlib.h"
 #include "Utility.h"
 #include "FV14Writer.h"
