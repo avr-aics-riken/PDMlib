@@ -15,8 +15,8 @@ project(PDMlib CXX)
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
 
 #デフォルトのコンパイラおよびコンパイルオプションの指定
-set(CMAKE_CXX_COMPILER "mpicxx")
-set(CMAKE_CXX_FLAGS "-g")
+#set(CMAKE_CXX_COMPILER "mpicxx")
+#set(CMAKE_CXX_FLAGS "-g")
 
 option(build_samples "build sample program for PDMlib" OFF)
 option(build_tests "build test program for PDMlib" OFF)
