@@ -54,8 +54,8 @@ protected:
 class WriteTextFile: public WriteFile
 {
     friend class WriteFactory;
-    WriteTextFile(const std::string& arg_type, const char& arg_delimiter): type(arg_type),
-                                                                           delimiter(arg_delimiter)
+    WriteTextFile(const std::string& arg_type, const char& arg_delimiter) : type(arg_type),
+        delimiter(arg_delimiter)
     {
         if((type == "int") || (type == "unsigned int") || (type == "float"))
         {
@@ -73,7 +73,7 @@ public:
 private:
     std::string type;
     size_t      size_of_type;
-    char        delimiter;
+    char delimiter;
 };
 
 //! バイナリ形式でファイル出力を行う具象クラス
@@ -95,8 +95,8 @@ public:
 class Encoder: public Write
 {
 protected:
-    Encoder(Write* arg): base(arg),
-                         buff(NULL){}
+    Encoder(Write* arg) : base(arg),
+        buff(NULL){}
 
 public:
     virtual ~Encoder()
@@ -116,7 +116,7 @@ protected:
 class ZipEncoder: public Encoder
 {
     friend class WriteFactory;
-    explicit ZipEncoder(Write* arg): Encoder(arg){}
+    explicit ZipEncoder(Write* arg) : Encoder(arg){}
 
 public:
     int write(const char* filename, const size_t& original_size, const size_t& actual_size, char* data);
@@ -126,18 +126,18 @@ public:
 class FpzipEncoder: public Encoder
 {
     friend class WriteFactory;
-    explicit FpzipEncoder(Write* arg, bool is_dp, int arg_vlen): Encoder(arg),
-                                                                 dp(0),
-                                                                 vlen(arg_vlen)
+    explicit FpzipEncoder(Write* arg, bool is_dp, int arg_vlen) : Encoder(arg),
+        dp(0),
+        vlen(arg_vlen)
     {
-        if(is_dp) dp = 1;
+        if(is_dp)dp = 1;
     }
 
 public:
     int write(const char* filename, const size_t& original_size, const size_t& actual_size, char* data);
 
 private:
-    int      dp;
+    int dp;
     unsigned vlen;
 };
 
@@ -145,7 +145,7 @@ private:
 class RLEEncoder: public Encoder
 {
     friend class WriteFactory;
-    explicit RLEEncoder(Write* arg): Encoder(arg){}
+    explicit RLEEncoder(Write* arg) : Encoder(arg){}
 
 public:
     int write(const char* filename, const size_t& original_size, const size_t& actual_size, char* data);

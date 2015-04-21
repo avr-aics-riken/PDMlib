@@ -25,7 +25,7 @@
 //! @file PDMlibのコンストラクタ/デストラクタ/publicメソッドの実装
 namespace PDMlib
 {
-PDMlib::PDMlib(): pImpl(new PDMlib::Impl()){}
+PDMlib::PDMlib() : pImpl(new PDMlib::Impl()){}
 
 PDMlib::~PDMlib()
 {
@@ -61,7 +61,7 @@ int PDMlib::Read(const std::string& Name, size_t* ContainerLength, T** Container
     pImpl->MakeTimeStep(&time_steps);
     pImpl->DetermineTimeStep(TimeStep, time_steps);
 
-    int&                     time_step = *TimeStep;
+    int& time_step = *TimeStep;
 
     std::vector<std::string> filenames;
     pImpl->MakeFilenameList(&filenames, time_step, Name, read_all_files);
@@ -71,7 +71,7 @@ int PDMlib::Read(const std::string& Name, size_t* ContainerLength, T** Container
         return *ContainerLength;
     }
 
-    size_t                                 total_size = 0;
+    size_t total_size = 0;
     std::vector<std::pair<size_t, char*> > buffers;
     pImpl->Read(Name, filenames, &buffers, &total_size);
     pImpl->AllocateContainer(total_size, *ContainerLength, Container);
@@ -93,7 +93,7 @@ int PDMlib::RegisterContainer(const std::string& Name, T** Container) const
         return -3;
     }
 
-    ContainerInfo     container_info;
+    ContainerInfo container_info;
     pImpl->rMetaData->GetContainerInfo(Name, &container_info);
 
     ContainerPointer* tmp = new ContainerPointer;
@@ -106,7 +106,7 @@ int PDMlib::RegisterContainer(const std::string& Name, T** Container) const
     tmp->nComp           = container_info.nComp;
 
     std::pair<std::set<ContainerPointer*>::iterator, bool> result = (pImpl->ContainerTable).insert(tmp);
-    if(!result.second) return -2;
+    if(!result.second)return -2;
 
     return 0;
 }
@@ -122,17 +122,17 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
     std::set<int> time_steps;
     pImpl->MakeTimeStep(&time_steps);
     pImpl->DetermineTimeStep(TimeStep, time_steps);
-    int&          time_step = *TimeStep;
+    int& time_step = *TimeStep;
 
     for(std::set<ContainerPointer*>::iterator it = pImpl->ContainerTable.begin(); it != pImpl->ContainerTable.end(); ++it)
     {
-        std::vector<std::string>               filenames;
+        std::vector<std::string> filenames;
         pImpl->MakeFilenameList(&filenames, time_step, (*it)->Name);
-        size_t                                 total_size = 0;
+        size_t total_size = 0;
         std::vector<std::pair<size_t, char*> > buffers;
         pImpl->Read((*it)->Name, filenames, &buffers, &total_size);
         (*it)->size = total_size;
-        size_t                                 written_size = 0;
+        size_t written_size = 0;
         if(total_size > 0)
         {
             (*it)->buff = new char[total_size];
@@ -241,8 +241,8 @@ int PDMlib::Write(const std::string& Name, const size_t& ContainerLength, T* Con
     //フィールドデータの出力
     ContainerInfo  container_info;
     pImpl->wMetaData->GetContainerInfo(Name, &container_info);
-    BaseIO::Write* writer     = BaseIO::WriteFactory::create(container_info.Compression, enumType2string(container_info.Type), container_info.nComp);
-    int            write_size = writer->write(filename.c_str(), ContainerLength*NumComp*sizeof(T), ContainerLength*NumComp*sizeof(T), (char*)Container);
+    BaseIO::Write* writer = BaseIO::WriteFactory::create(container_info.Compression, enumType2string(container_info.Type), container_info.nComp);
+    int write_size        = writer->write(filename.c_str(), ContainerLength*NumComp*sizeof(T), ContainerLength*NumComp*sizeof(T), (char*)Container);
     delete writer;
     return write_size;
 }
@@ -319,6 +319,7 @@ void PDMlib::SetBoundingBox(double* bbox)
 void PDMlib::SetComm(const MPI_Comm& comm)
 {
     pImpl->wMetaData->SetComm(comm);
+    if(pImpl->rMetaData != NULL)pImpl->rMetaData->SetComm(comm);
 }
 
 template int PDMlib::Read(const std::string& Name, size_t* ContainerLength, int**           Container, int* TimeStep, bool read_all_files);

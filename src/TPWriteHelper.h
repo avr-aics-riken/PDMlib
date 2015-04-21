@@ -16,7 +16,7 @@ namespace PDMlib
 class TPWriteHelper
 {
 public:
-    TPWriteHelper(): level(0){}
+    TPWriteHelper() : level(0){}
 
     void write_header(std::ofstream& out, const std::string& header)
     {

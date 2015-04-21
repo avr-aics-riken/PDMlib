@@ -58,8 +58,8 @@ protected:
 class ReadBinaryFile: public ReadFile
 {
     friend class ReadFactory;
-    ReadBinaryFile(const int& arg_size_of_datatype): need_endian_convert(false),
-                                                     size_of_datatype(arg_size_of_datatype){}
+    ReadBinaryFile(const int& arg_size_of_datatype) : need_endian_convert(false),
+        size_of_datatype(arg_size_of_datatype){}
 
 public:
     //! @attention 内部でnew char [] するので、*dataに確保済の領域を指定しないこと。
@@ -97,8 +97,8 @@ private:
 class Decoder: public Read
 {
 protected:
-    Decoder(Read* arg): base(arg),
-                        buff(NULL){}
+    Decoder(Read* arg) : base(arg),
+        buff(NULL){}
 
 public:
     virtual ~Decoder()
@@ -117,7 +117,7 @@ protected:
 class ZipDecoder: public Decoder
 {
     friend class ReadFactory;
-    explicit ZipDecoder(Read* arg): Decoder(arg){}
+    explicit ZipDecoder(Read* arg) : Decoder(arg){}
 
 public:
     int read(const char* filename, size_t& original_size, char** data);
@@ -127,18 +127,18 @@ public:
 class FpzipDecoder: public Decoder
 {
     friend class ReadFactory;
-    explicit FpzipDecoder(Read* arg, bool is_dp, int arg_vlen): Decoder(arg),
-                                                                dp(0),
-                                                                vlen(arg_vlen)
+    explicit FpzipDecoder(Read* arg, bool is_dp, int arg_vlen) : Decoder(arg),
+        dp(0),
+        vlen(arg_vlen)
     {
-        if(is_dp) dp = 1;
+        if(is_dp)dp = 1;
     }
 
 public:
     int read(const char* filename, size_t& original_size, char** data);
 
 private:
-    int      dp;
+    int dp;
     unsigned vlen;
 };
 
@@ -146,7 +146,7 @@ private:
 class RLEDecoder: public Decoder
 {
     friend class ReadFactory;
-    explicit RLEDecoder(Read* arg): Decoder(arg){}
+    explicit RLEDecoder(Read* arg) : Decoder(arg){}
 
 public:
     int read(const char* filename, size_t& original_size, char** data);

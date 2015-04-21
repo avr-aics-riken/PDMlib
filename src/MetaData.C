@@ -36,13 +36,13 @@ MetaData::~MetaData()
 int MetaData::Read()
 {
     TextParser tp;
-    if(tp.read(FileName) != 0)
+    if(tp.read_local(FileName) != 0)
     {
         std::cerr<<"MetaData read failed!! ("<<FileName<<")"<<std::endl;
     }
 
-    std::string              tp_value;
-    int                      ierr;
+    std::string tp_value;
+    int ierr;
     tp.getValue("/DomainInfo/BoundingBox", tp_value);
     std::vector<std::string> strBbox;
     tp.splitVector(tp_value, strBbox);
@@ -51,11 +51,11 @@ int MetaData::Read()
         BoundingBox[i] = stof(strBbox[i]);
     }
 
-    tp.getValue("/Header/Version", Version);
-    tp.getValue("/Header/Endian", Endian);
+    tp.getValue("/Header/Version",      Version);
+    tp.getValue("/Header/Endian",       Endian);
     tp.getValue("/Header/BaseFileName", BaseFileName);
 
-    tp.getValue("/MPI/NumProc", tp_value);
+    tp.getValue("/MPI/NumProc",         tp_value);
     NumProc = tp.convertInt(tp_value, &ierr);
 
     tp.getValue("/Header/NumContainer", tp_value);
@@ -76,24 +76,24 @@ int MetaData::Read()
             std::string Name = *it;
 
             std::string Annotation;
-            tp.getValue(Name+"/Annotation", Annotation);
+            tp.getValue(Name+"/Annotation",  Annotation);
 
             std::string Compression;
             tp.getValue(Name+"/Compression", Compression);
 
-            tp.getValue(Name+"/Type", tp_value);
+            tp.getValue(Name+"/Type",        tp_value);
             SupportedType Type = string2enumType(tp_value);
 
             std::string   Suffix;
-            tp.getValue(Name+"/Suffix", Suffix);
+            tp.getValue(Name+"/Suffix",      Suffix);
 
-            tp.getValue(Name+"/nComp", tp_value);
-            int           nComp = tp.convertInt(tp_value, &ierr);
+            tp.getValue(Name+"/nComp",       tp_value);
+            int nComp = tp.convertInt(tp_value, &ierr);
 
             tp.getValue(Name+"/VectorOrder", tp_value);
             StorageOrder  VectorOrder = string2enumStorageOrder(tp_value);
 
-            ContainerInfo tmp = {Name, Annotation, Compression, Type, Suffix, nComp, VectorOrder};
+            ContainerInfo tmp         = {Name, Annotation, Compression, Type, Suffix, nComp, VectorOrder};
             AddContainer(tmp);
         }
     }
@@ -111,25 +111,25 @@ int MetaData::Read()
             std::string Name = *it;
 
             std::string Unit;
-            tp.getValue(Name+"/Unit", Unit);
+            tp.getValue(Name+"/Unit",       Unit);
 
-            tp.getValue(Name+"/reference", tp_value);
-            double   reference = tp.convertDouble(tp_value, &ierr);
+            tp.getValue(Name+"/reference",  tp_value);
+            double reference = tp.convertDouble(tp_value, &ierr);
 
             tp.getValue(Name+"/difference", tp_value);
-            double   difference = tp.convertDouble(tp_value, &ierr);
+            double difference = tp.convertDouble(tp_value, &ierr);
 
-            tp.getValue(Name+"/BsetDiff", tp_value);
+            tp.getValue(Name+"/BsetDiff",   tp_value);
             bool     BsetDiff = tp.convertBool(tp_value, &ierr);
 
-            UnitElem tmp = {Name, Unit, reference, difference, BsetDiff};
+            UnitElem tmp      = {Name, Unit, reference, difference, BsetDiff};
             AddUnit(tmp);
         }
     }
     tp.remove();
 
     //カレントディレクトリにあるフィールドデータのうち最新のステップのものを探してTimeStepに代入
-    DIR*        dp;
+    DIR* dp;
     std::string dirname("./");
     if((dp = opendir(dirname.c_str())) == NULL)
     {
@@ -137,7 +137,7 @@ int MetaData::Read()
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
-    struct dirent*         entry;
+    struct dirent* entry;
     std::list<std::string> timesteps;
     entry = readdir(dp);
     while(entry != NULL)
@@ -163,7 +163,7 @@ int MetaData::Read()
 #define WRITE_VALUE(VAR) TpHelper.write_value(out, #VAR, VAR);
 int MetaData::Write()
 {
-    if(GetMyRank() > 0) return 0;
+    if(GetMyRank() > 0)return 0;
 
     SetReadOnly();
     for(std::vector<ContainerInfo>::iterator it = Containers.begin(); it != Containers.end(); ++it)
@@ -184,10 +184,10 @@ int MetaData::Write()
         for(std::vector<UnitElem>::iterator it = Units.begin(); it != Units.end(); ++it)
         {
             TpHelper.write_header(out, (*it).Name);
-            TpHelper.write_value(out, "Unit", (*it).Unit);
-            TpHelper.write_value(out, "reference", (*it).reference);
+            TpHelper.write_value(out, "Unit",       (*it).Unit);
+            TpHelper.write_value(out, "reference",  (*it).reference);
             TpHelper.write_value(out, "difference", (*it).difference);
-            TpHelper.write_value(out, "BsetDiff", (*it).BsetDiff);
+            TpHelper.write_value(out, "BsetDiff",   (*it).BsetDiff);
             TpHelper.write_rbrace(out);
         }
         TpHelper.write_rbrace(out);
@@ -201,11 +201,11 @@ int MetaData::Write()
         for(std::vector<ContainerInfo>::iterator it = Containers.begin(); it != Containers.end(); ++it)
         {
             TpHelper.write_header(out, (*it).Name);
-            TpHelper.write_value(out, "Annotation", (*it).Annotation);
+            TpHelper.write_value(out, "Annotation",  (*it).Annotation);
             TpHelper.write_value(out, "Compression", (*it).Compression);
-            TpHelper.write_value(out, "Type", enumType2string((*it).Type));
-            TpHelper.write_value(out, "Suffix", (*it).Suffix);
-            TpHelper.write_value(out, "nComp", (*it).nComp);
+            TpHelper.write_value(out, "Type",        enumType2string((*it).Type));
+            TpHelper.write_value(out, "Suffix",      (*it).Suffix);
+            TpHelper.write_value(out, "nComp",       (*it).nComp);
             std::string VectorOrder = (*it).VectorOrder == NIJK ? "NIJK" : "IJKN";
             TpHelper.write_value(out, "VectorOrder", VectorOrder);
             TpHelper.write_rbrace(out);
@@ -223,10 +223,10 @@ int MetaData::Write()
     //計算領域情報の出力
     TpHelper.write_header(out, "DomainInfo");
     WRITE_VALUE(NumProc);
-    TpHelper.write_vector(out, "GlobalOrigin", BoundingBox, 3);
+    TpHelper.write_vector(out, "GlobalOrigin", BoundingBox,  3);
     double GlobalRegion[3] = {BoundingBox[3]-BoundingBox[0], BoundingBox[4]-BoundingBox[1], BoundingBox[5]-BoundingBox[2]};
     TpHelper.write_vector(out, "GlobalRegion", GlobalRegion, 3);
-    TpHelper.write_vector(out, "BoundingBox", BoundingBox, 6);
+    TpHelper.write_vector(out, "BoundingBox",  BoundingBox,  6);
     TpHelper.write_rbrace(out);
     return 0;
 }
@@ -236,9 +236,9 @@ int MetaData::Write()
 template<typename T>
 int MetaData::WriteTimeSlice(const int& TimeStep, const double& Time, T* MinMax, const int& ContainerLength, const std::string& Name)
 {
-    if(GetMyRank() > 0) return 0;
+    if(GetMyRank() > 0)return 0;
 
-    if(Written[Name]) return -1;
+    if(Written[Name])return -1;
 
     std::ofstream out(FileName.c_str(), std::ios::out|std::ios::app);
     TPWriteHelper TpHelper;
@@ -306,7 +306,7 @@ int MetaData::WriteTimeSlice(const int& TimeStep, const double& Time, T* MinMax,
 
 std::string MetaData::GetEndian(void) const
 {
-    static bool        first_call = true;
+    static bool first_call = true;
     static std::string endian;
     if(first_call)
     {

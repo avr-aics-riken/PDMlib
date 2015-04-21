@@ -149,12 +149,12 @@ void ReadAndWriteContainerSelector(std::ofstream& out, PDMlib::ContainerInfo con
 int main(int argc, char* argv[])
 {
     MPI_Init(&argc, &argv);
-    int           start_time = -1;
-    int           end_time   = INT_MAX;
-    std::string   dir_name("./");
-    std::string   dfi_filename;
-    std::string   coordinate("Coordinate");
-    bool          with_bbox = false;
+    int start_time = -1;
+    int end_time   = INT_MAX;
+    std::string dir_name("./");
+    std::string dfi_filename;
+    std::string coordinate("Coordinate");
+    bool with_bbox = false;
     ComandLineParser(argc, argv, &start_time, &end_time, &dir_name, &dfi_filename, &coordinate, &with_bbox);
     std::ifstream ifs(dfi_filename.c_str());
     if(ifs.fail())
@@ -170,9 +170,9 @@ int main(int argc, char* argv[])
     std::vector<PDMlib::ContainerInfo>& containers = pdmlib.GetContainerInfo();
 
     // メタデータファイルから読み込んだコンテナ情報を元に出力変数の名前のリストを作成（座標は除く）
-    std::vector<std::string>            container_names;
-    bool                                coord_found = false;
-    PDMlib::ContainerInfo               coord_container;
+    std::vector<std::string> container_names;
+    bool coord_found = false;
+    PDMlib::ContainerInfo    coord_container;
     for(std::vector<PDMlib::ContainerInfo>::iterator it = containers.begin(); it != containers.end();)
     {
         if((*it).Name != coordinate)
@@ -201,10 +201,11 @@ int main(int argc, char* argv[])
 
     // 時間方向でデータ分散
     std::set<int> time_steps;
-    PDMlib::MakeTimeStepList(&time_steps, pdmlib.GetBaseFileName(), dir_name, start_time, end_time);
+    std::string   coord_suffix = "*."+coord_container.Suffix;
+    PDMlib::MakeTimeStepList(&time_steps, pdmlib.GetBaseFileName(), dir_name, start_time, end_time, coord_suffix);
 
-    int           nproc, myrank;
-    MPI_Comm      comm = MPI_COMM_WORLD;
+    int nproc, myrank;
+    MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_size(comm, &nproc);
     MPI_Comm_rank(comm, &myrank);
 
@@ -231,7 +232,7 @@ int main(int argc, char* argv[])
         Out.open(filename.c_str(), std::ios::binary);
         int    time_step = *it_time_step;
         // 粒子数を取得するために、座標コンテナを読み込む
-        size_t length = -1;
+        size_t length    = -1;
         if(coord_container.Type == PDMlib::FLOAT)
         {
             float* ptr = NULL;

@@ -30,7 +30,7 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
     }
 
     char size_of_int;
-    in.read((char*)&size_of_int, 1);
+    in.read((char*)&size_of_int,    1);
     char size_of_size_t;
     in.read((char*)&size_of_size_t, 1);
     //TODO size_of_intやsize_of_size_tの値を見て、byte_order_markなどの変数の型を変える
@@ -123,7 +123,7 @@ int FpzipDecoder::read(const char* filename, size_t& original_size, char** data)
 
     int    num_elements = dp ? original_size/8 : original_size/4;
 
-    size_t dest_size = fpzip_memory_read(*data, buff, NULL, dp, num_elements, 1, 1, vlen);
+    size_t dest_size    = fpzip_memory_read(*data, buff, NULL, dp, num_elements, 1, 1, vlen);
     if(dest_size <= 0)
     {
         std::cerr<<"Fpzip decod failed"<<std::endl;

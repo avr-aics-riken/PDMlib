@@ -40,13 +40,15 @@ bool isFile(const std::string& filename);
 int GetStartIndex(const int& N, const int& NumProc, const int& MyRank);
 
 //! 指定されたディレクトリ以下にあるファイルの一覧を返す
-void ListDirectoryContents(std::string dir_name, std::vector<std::string>* filenames);
+//
+//! glob(3)に対するラッパー
+void ListDirectoryContents(const std::string& dir_name, std::vector<std::string>* filenames, const std::string& wild_card = "*");
 
 //! 指定されたディレクトリ以下にあるファイルからタイムステップ部分を抜き出したもののリストを作る
 //
 //! keywordを含むファイル名から、一番右の'_'と'.'で囲まれた文字をintに変換したリストを作るだけなので
 //! この間に数字以外が含まれていると誤動作する
-void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name = "./", const int& start_time = 0, const int& end_time = INT_MAX);
+void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name = "./", const int& start_time = 0, const int& end_time = INT_MAX, const std::string& wild_card = "*");
 
 //! @brief 引数で渡された文字列が全て数字かどうかを判定
 bool is_all_digit(const std::string& str);
@@ -136,7 +138,6 @@ std::string enumStorageOrder2string(StorageOrder enumStorageOrder);
 StorageOrder string2enumStorageOrder(std::string stringStorageOrder);
 
 //! sizeof演算子の代替
-size_t GetSize(SupportedType enumType
-               );
+size_t GetSize(SupportedType enumType);
 } //end of namespace
 #endif

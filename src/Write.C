@@ -53,15 +53,15 @@ int WriteBinaryFile::write(const char* filename, const size_t& original_size, co
 {
     const int byte_order_mark = BOM;
     WriteFile::out.open(filename, std::ios::binary);
-    char      size_of_int = sizeof(int);
-    WriteFile::out.write(&size_of_int, 1);
-    char      size_of_size_t = sizeof(size_t);
-    WriteFile::out.write(&size_of_size_t, 1);
+    char      size_of_int     = sizeof(int);
+    WriteFile::out.write(&size_of_int,            1);
+    char      size_of_size_t  = sizeof(size_t);
+    WriteFile::out.write(&size_of_size_t,         1);
 
     WriteFile::out.write((char*)&byte_order_mark, sizeof(int));
-    WriteFile::out.write((char*)&original_size, sizeof(size_t));
-    WriteFile::out.write((char*)&actual_size, sizeof(size_t));
-    WriteFile::out.write((char*)data, actual_size);
+    WriteFile::out.write((char*)&original_size,   sizeof(size_t));
+    WriteFile::out.write((char*)&actual_size,     sizeof(size_t));
+    WriteFile::out.write((char*)data,             actual_size);
     WriteFile::out.close();
     return actual_size;
 }
@@ -88,7 +88,7 @@ int FpzipEncoder::write(const char* filename, const size_t& original_size, const
 
 int RLEEncoder::write(const char* filename, const size_t& original_size, const size_t& actual_size, char* data)
 {
-    size_t   output_size = compressBound(actual_size);
+    size_t output_size = compressBound(actual_size);
     buff = new char[output_size];
 
     z_stream z;
