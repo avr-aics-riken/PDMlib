@@ -48,7 +48,7 @@ int MetaData::Read()
     tp.splitVector(tp_value, strBbox);
     for(int i = 0; i < 6; i++)
     {
-        BoundingBox[i] = stof(strBbox[i]);
+        BoundingBox[i] = stof_wrapper(strBbox[i]);
     }
 
     tp.getValue("/Header/Version",      Version);
@@ -155,7 +155,7 @@ int MetaData::Read()
     timesteps.sort();
     timesteps.unique();
 
-    TimeStep = stoi(timesteps.back());
+    TimeStep = stoi_wrapper(timesteps.back());
 
     return 0;
 }

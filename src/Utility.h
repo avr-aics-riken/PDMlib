@@ -79,25 +79,20 @@ int get_region_number(const std::string& filename);
 template<typename T>
 std::string to_string(T value)
 {
+#if __cplusplus >= 201103L
+    return std::to_string(value);
+#else
     std::stringstream ss;
     ss<<value;
     return ss.str();
+#endif
 }
 
 //! std::stringをintに変換
-int stoi(std::string str);
-
-//! std::stringをlongに変換
-long stol(std::string str);
-
-//! std::stringをlong longに変換
-long long stoll(std::string str);
+int stoi_wrapper(std::string str);
 
 //! std::stringをfloatに変換
-float stof(std::string str);
-
-//! std::stringをdoubleに変換
-double stod(std::string str);
+float stof_wrapper(std::string str);
 
 //
 // UnitElem 構造体のソート用プレディケータ

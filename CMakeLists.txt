@@ -14,10 +14,6 @@ project(PDMlib CXX)
 
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
 
-#デフォルトのコンパイラおよびコンパイルオプションの指定
-#set(CMAKE_CXX_COMPILER "mpicxx")
-#set(CMAKE_CXX_FLAGS "-g")
-
 option(build_samples "build sample program for PDMlib" OFF)
 option(build_tests "build test program for PDMlib" OFF)
 
@@ -78,6 +74,8 @@ endif ( NOT HDF5_FOUND )
 find_package (TextParser REQUIRED)
 find_package (FPZIP      REQUIRED)
 find_package (Zoltan     REQUIRED)
+find_package (MPI        REQUIRED)
+
 
 ##############################################
 # include PATHの設定(ライブラリ用)
@@ -88,6 +86,7 @@ set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
                     ${FPZIP_INCLUDE_DIRS}
                     ${Zoltan_INCLUDE_DIRS}
                     ${TextParser_INCLUDE_DIRS}
+                    ${MPI_INCLUDE_PATH}
                    )
 include_directories(${INCLUDE_DIRS})
 if (HDF5_FOUND )
@@ -106,6 +105,13 @@ install (FILES ${PROJECT_SOURCE_DIR}/LICENSE                  DESTINATION share)
 install (FILES ${PROJECT_SOURCE_DIR}/README.md                DESTINATION share)
 install (FILES ${PROJECT_SOURCE_DIR}/cmake/FindPDMlib.cmake   DESTINATION share)
 
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(PDM PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+if(MPI_LINK_FLAGS)
+  set_target_properties(PDM PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
+
 
 ##############################################
 # ツール類のビルド&インストール
@@ -113,18 +119,31 @@ install (FILES ${PROJECT_SOURCE_DIR}/cmake/FindPDMlib.cmake   DESTINATION share)
 
 install (PROGRAMS ${PROJECT_SOURCE_DIR}/tools/stage.py DESTINATION bin)
 
-set (MANDATORY_LIBS PDM ${TextParser_LIBRARIES} ${ZLIB_LIBRARIES} ${FPZIP_LIBRARIES} ${Zoltan_LIBRARIES})
+set (MANDATORY_LIBS PDM ${TextParser_LIBRARIES} ${ZLIB_LIBRARIES} ${FPZIP_LIBRARIES} ${Zoltan_LIBRARIES} ${MPI_LIBRARIES})
 
 # FV14用コンバータ
 add_executable(FV14Converter    ${FV14CONVERTER_SRC})
 target_link_libraries(FV14Converter   ${MANDATORY_LIBS})
 install (TARGETS  FV14Converter    DESTINATION bin)
 
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(FV14Converter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+if(MPI_LINK_FLAGS)
+  set_target_properties(FV14Converter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
+
 # HDF5用コンバータ
 if (HDF5_FOUND )
 add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
 target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
 install (TARGETS  H5PartConverter  DESTINATION bin)
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(H5PartConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+if(MPI_LINK_FLAGS)
+  set_target_properties(H5PartConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
 endif(HDF5_FOUND)
 
 
@@ -175,4 +194,12 @@ target_link_libraries(MigrationTest  ${MANDATORY_LIBS})
 
 # インストール
 install (TARGETS UnitTest DESTINATION bin)
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(UnitTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  set_target_properties(MigrationTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+if(MPI_LINK_FLAGS)
+  set_target_properties(UnitTest PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+  set_target_properties(MigrationTest PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
 endif()

@@ -20,17 +20,24 @@ include(LibFindMacros)
 # Use pkg-config to get hints about paths
 libfind_pkg_check_modules(Zoltan_PKGCONF Zoltan)
 
+if(CMAKE_PREFIX_PATH)
+  set(Zoltan_CANDIDATE_PATH ${CMAKE_PREFIX_PATH})
+  file(GLOB tmp "${CMAKE_PREFIX_PATH}/[Zz][Oo][Ll][Tt][Aa][Nn]*/")
+  list(APPEND Zoltan_CANDIDATE_PATH ${tmp})
+  message($tmp)
+endif()
+
 # Include dir
 find_path(Zoltan_INCLUDE_DIR
   NAMES zoltan_cpp.h
-  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_INCLUDE_DIRS}
+  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_INCLUDE_DIRS} ${Zoltan_CANDIDATE_PATH}
   PATH_SUFFIXES include
 )
 
 # Finally the library itself
 find_library(Zoltan_LIBRARY
   NAMES zoltan
-  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_LIBRARY_DIRS}
+  PATHS ${ZOLTAN_ROOT} ${Zoltan_PKGCONF_LIBRARY_DIRS} ${Zoltan_CANDIDATE_PATH}
   PATH_SUFFIXES lib 
 )
 
