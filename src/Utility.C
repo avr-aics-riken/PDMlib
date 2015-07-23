@@ -112,7 +112,7 @@ int get_time_step(const std::string& filename)
     {
         return -2;
     }
-    return stoi(str_time_step);
+    return stoi_wrapper(str_time_step);
 }
 
 int get_region_number(const std::string& filename)
@@ -133,7 +133,7 @@ int get_region_number(const std::string& filename)
     {
         return -2;
     }
-    return stoi(str_region_number);
+    return stoi_wrapper(str_region_number);
 }
 
 void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name, const int& start_time, const int& end_time, const std::string& wild_card)
@@ -156,11 +156,22 @@ void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, con
     }
 }
 
-int stoi(std::string str){return atoi(str.c_str());}
-long stol(std::string str){return atol(str.c_str());}
-long long stoll(std::string str){return atoll(str.c_str());}
-float stof(std::string str){return (float)atof(str.c_str());}
-double stod(std::string str){return atof(str.c_str());}
+int stoi_wrapper(std::string str)
+{
+#if __cplusplus >= 201103L
+  return std::stoi(str);
+#else
+  return atoi(str.c_str());
+#endif
+}
+float stof_wrapper(std::string str)
+{
+#if __cplusplus >= 201103L
+  return std::stof(str);
+#else
+  return (float)atof(str.c_str());
+#endif
+}
 
 SupportedType string2enumType(std::string sType)
 {

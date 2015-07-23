@@ -20,17 +20,23 @@ include(LibFindMacros)
 # Use pkg-config to get hints about paths
 libfind_pkg_check_modules(PDMlib_PKGCONF PDMlib)
 
+if(CMAKE_PREFIX_PATH)
+  set(PDMlib_CANDIDATE_PATH ${CMAKE_PREFIX_PATH})
+  file(GLOB tmp "${CMAKE_PREFIX_PATH}/[Pp][Dd][Mm]*/")
+  list(APPEND PDMlib_CANDIDATE_PATH ${tmp})
+endif()
+
 # Include dir
 find_path(PDMlib_INCLUDE_DIR
   NAMES PDMlib.h
-  PATHS ${TP_ROOT} ${PDMlib_PKGCONF_INCLUDE_DIRS}
+  PATHS ${TP_ROOT} ${PDMlib_PKGCONF_INCLUDE_DIRS} ${PDMlib_CANDIDATE_PATH}
   PATH_SUFFIXES include
 )
 
 # Finally the library itself
 find_library(PDMlib_LIBRARY
   NAMES PDMlib
-  PATHS ${TP_ROOT} ${PDMlib_PKGCONF_LIBRARY_DIRS}
+  PATHS ${TP_ROOT} ${PDMlib_PKGCONF_LIBRARY_DIRS} ${PDMlib_CANDIDATE_PATH}
   PATH_SUFFIXES lib 
 )
 

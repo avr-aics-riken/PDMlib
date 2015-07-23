@@ -20,17 +20,23 @@ include(LibFindMacros)
 # Use pkg-config to get hints about paths
 libfind_pkg_check_modules(FPZIP_PKGCONF FPZIP)
 
+if(CMAKE_PREFIX_PATH)
+  set(FPZIP_CANDIDATE_PATH ${CMAKE_PREFIX_PATH})
+  file(GLOB tmp "${CMAKE_PREFIX_PATH}/[Ff][Pp][Zz][Ii][Pp]*/")
+  list(APPEND FPZIP_CANDIDATE_PATH ${tmp})
+endif()
+
 # Include dir
 find_path(FPZIP_INCLUDE_DIR
   NAMES fpzip.h
-  PATHS ${FPZIP_ROOT} ${FPZIP_PKGCONF_INCLUDE_DIRS}
+  PATHS ${FPZIP_ROOT} ${FPZIP_PKGCONF_INCLUDE_DIRS} ${FPZIP_CANDIDATE_PATH}
   PATH_SUFFIXES include
 )
 
 # Finally the library itself
 find_library(FPZIP_LIBRARY
   NAMES fpzip
-  PATHS ${FPZIP_ROOT} ${FPZIP_PKGCONF_LIBRARY_DIRS}
+  PATHS ${FPZIP_ROOT} ${FPZIP_PKGCONF_LIBRARY_DIRS} ${FPZIP_CANDIDATE_PATH}
   PATH_SUFFIXES lib
 )
 
