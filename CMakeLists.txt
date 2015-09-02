@@ -8,6 +8,34 @@
 #
 ###################################################################################
 
+#
+# cmake実行時に指定できるオプション
+#
+# -DCMAKE_INSTALL_PREFIX=<prefix>
+#    インストール先のPATHをprefix以下へ変更する (デフォルトは/usr/local)
+#
+# -DCMAKE_PREFIX_PATH=<path>
+#    依存するライブラリを探すパスを指定する (デフォルトは無指定)
+#
+# -DCMAKE_BUILD_TYPE=DEBUG
+#    デバッグ版をビルドする (最適化オプション無し、計時機能off、デバッグ出力on)
+#
+# -Dbuild_samples=yes
+#    サンプルプログラムをビルドする (デフォルトoff)
+#
+# -Dbuild_tests=yes
+#    テストプログラムをビルドする (デフォルトoff)
+#
+# -DFPZIP_ROOT=<path>
+#    Fpzipのインストール先を明示的に指定する (デフォルトは無指定)
+#
+# -DZOLTAN_ROOT=<path>
+#    Zoltanのインストール先を明示的に指定する (デフォルトは無指定)
+#
+# -DTP_ROOT=<path>
+#    TextParserのインストール先を明示的に指定する (デフォルトは無指定)
+
+
 cmake_minimum_required(VERSION 2.6)
 
 project(PDMlib CXX)
@@ -15,7 +43,7 @@ project(PDMlib CXX)
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
 
 option(build_samples "build sample program for PDMlib" OFF)
-option(build_tests "build test program for PDMlib" OFF)
+option(build_tests   "build test program for PDMlib" OFF)
 
 #ビルド設定の表示
 message( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
@@ -43,6 +71,7 @@ set(LIB_SRC
 # コンバータ
 set(FV14CONVERTER_SRC   ${PROJECT_SOURCE_DIR}/tools/FV14Converter.C)
 set(H5PartCONVERTER_SRC ${PROJECT_SOURCE_DIR}/tools/H5PartConverter.C)
+set(VtkCONVERTER_SRC   ${PROJECT_SOURCE_DIR}/tools/VtkConverter.C)
 
 #テストコード
 set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test/src)
@@ -145,6 +174,18 @@ if(MPI_LINK_FLAGS)
   set_target_properties(H5PartConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
 endif()
 endif(HDF5_FOUND)
+
+#VTK用コンバータ
+add_executable(VtkConverter       ${VtkCONVERTER_SRC})
+target_link_libraries(VtkConverter ${MANDATORY_LIBS})
+install (TARGETS  VtkConverter    DESTINATION bin)
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(VtkConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+if(MPI_LINK_FLAGS)
+  set_target_properties(VtkConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
+
 
 
 ##############################################

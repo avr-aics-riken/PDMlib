@@ -21,15 +21,15 @@ namespace
 {
 void PrintUsageAndAbort(const char* cmd)
 {
-    std::cerr<<"usage: "<<cmd<<" -f meta_data_file {-c Coordinate Container name} {-s start time} {-e end time} {-d directory} {-b}"<<std::endl;
+    std::cerr<<"usage: "<<cmd<<" -f meta_data_file {-c Coordinate Container name} {-s start time} {-e end time} {-b}"<<std::endl;
     std::cerr<<"       if '-b' is specified, bounding box will be output as FV-UNS(text)"<<std::endl;
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
-void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::string* dir_name, std::string* dfi_filename, std::string* coordinate, bool* with_bbox)
+void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::string* dfi_filename, std::string* coordinate, bool* with_bbox)
 {
     int results = 0;
-    while((results = getopt(argc, argv, "s:e:c:d:f:b")) != -1)
+    while((results = getopt(argc, argv, "s:e:c:f:b")) != -1)
     {
         switch(results)
         {
@@ -43,10 +43,6 @@ void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::s
 
         case 'c':
             *coordinate = optarg;
-
-        case 'd':
-            *dir_name = optarg;
-            break;
 
         case 'f':
             *dfi_filename = optarg;
@@ -149,13 +145,17 @@ void ReadAndWriteContainerSelector(std::ofstream& out, PDMlib::ContainerInfo con
 int main(int argc, char* argv[])
 {
     MPI_Init(&argc, &argv);
+    int nproc, myrank;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Comm_size(comm, &nproc);
+    MPI_Comm_rank(comm, &myrank);
+
     int start_time = -1;
     int end_time   = INT_MAX;
-    std::string dir_name("./");
     std::string dfi_filename;
     std::string coordinate("Coordinate");
     bool with_bbox = false;
-    ComandLineParser(argc, argv, &start_time, &end_time, &dir_name, &dfi_filename, &coordinate, &with_bbox);
+    ComandLineParser(argc, argv, &start_time, &end_time, &dfi_filename, &coordinate, &with_bbox);
     std::ifstream ifs(dfi_filename.c_str());
     if(ifs.fail())
     {
@@ -202,12 +202,7 @@ int main(int argc, char* argv[])
     // 時間方向でデータ分散
     std::set<int> time_steps;
     std::string   coord_suffix = "*."+coord_container.Suffix;
-    PDMlib::MakeTimeStepList(&time_steps, pdmlib.GetBaseFileName(), dir_name, start_time, end_time, coord_suffix);
-
-    int nproc, myrank;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Comm_size(comm, &nproc);
-    MPI_Comm_rank(comm, &myrank);
+    PDMlib::MakeTimeStepList(&time_steps, pdmlib.GetBaseFileName(), pdmlib.GetPath(), start_time, end_time, coord_suffix);
 
     std::set<int>::iterator my_start_time = time_steps.begin();
     std::set<int>::iterator my_end_time   = time_steps.begin();

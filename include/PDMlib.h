@@ -157,11 +157,17 @@ public:
     //!出力するフィールドデータのベースファイル名を指定します。
     int SetBaseFileName(const std::string& FileName);
 
+    /// フィールドデータの出力先ディレクトリを指定します。
+    int SetPath(const std::string& path);
+
     //!解析領域全体のbounding boxを設定します。
     void SetBoundingBox(double* bbox);
 
     //! ファイル出力を行うプロセスが所属するコミュニケータを設定します
     void SetComm(const MPI_Comm& comm);
+
+    //! 出力ファイル名のフォーマットを指定する
+    int SetFileNameFormat(const std::string& format);
 
     //
     // 入力用メタデータオブジェクトに対するgetter/setter
@@ -171,6 +177,9 @@ public:
 
     //! 入力用として指定されたフィールドデータのベースファイル名を取得します
     std::string GetBaseFileName(void);
+
+    /// フィールドデータの入力元ディレクトリを取得します
+    std::string GetPath(void);
 
     //! 入力用として指定されたDFIファイルからBoundingBoxの情報を取得します
     void GetBoundingBox(double* bbox);

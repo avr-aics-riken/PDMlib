@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 
     // PDMlibのセットアップ
     {
-        PDMlib::PDMlib::GetInstance().Init(argc, argv, "PDMlibMigrationSample.dfi", "PDMlibMigrationSample.dfi");
+        PDMlib::PDMlib::GetInstance().Init(argc, argv, "PDMlibMigrationSample.dfi", "PDMlibWriteSample.dfi");
     }
 
     int*    ID          = NULL;

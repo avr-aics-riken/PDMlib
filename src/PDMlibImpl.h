@@ -134,9 +134,9 @@ public:
     }
 
     //! カレントディレクトリ以下にあるファイルを元にタイムステップのリストを作る
-    void MakeTimeStep(std::set<int>* time_steps, const std::string& dir_name = "./")
+    void MakeTimeStep(std::set<int>* time_steps)
     {
-        MakeTimeStepList(time_steps, rMetaData->GetBaseFileName(), dir_name);
+        MakeTimeStepList(time_steps, rMetaData->GetBaseFileName(), rMetaData->GetPath());
     }
 
     //! 読み込む対象のTimeStepを決める
@@ -162,7 +162,7 @@ public:
         if(read_all_files)
         {
             std::vector<std::string> tmp_filenames;
-            ListDirectoryContents("./", &tmp_filenames);
+            ListDirectoryContents(rMetaData->GetPath(), &tmp_filenames);
             std::string   tail1("_");
             tail1 += to_string(time_step);
             ContainerInfo container_info;
