@@ -48,16 +48,16 @@ int MetaData::Read()
     tp.splitVector(tp_value, strBbox);
     for(int i = 0; i < 6; i++)
     {
-        BoundingBox[i] = stof_wrapper(strBbox[i]);
+        BoundingBox[i] = stod_wrapper(strBbox[i]);
     }
 
-    tp.getValue("/Header/Version",      Version);
-    tp.getValue("/Header/Endian",       Endian);
-    tp.getValue("/Header/BaseFileName", BaseFileName);
-
-    tp.getValue("/MPI/NumProc",         tp_value);
+    tp.getValue("/Header/Version",             Version);
+    tp.getValue("/Header/Endian",              Endian);
+    tp.getValue("/Header/Prefix",        Prefix);
+    tp.getValue("/Header/DirectoryPath",       DirectoryPath);
+    tp.getValue("/Header/FieldFilenameFormat", FieldFilenameFormat);
+    tp.getValue("/MPI/NumProc",                tp_value);
     NumProc = tp.convertInt(tp_value, &ierr);
-
     tp.getValue("/Header/NumContainer", tp_value);
     int NumContainer = tp.convertInt(tp_value, &ierr);
 
@@ -128,9 +128,9 @@ int MetaData::Read()
     }
     tp.remove();
 
-    //カレントディレクトリにあるフィールドデータのうち最新のステップのものを探してTimeStepに代入
+    //pathにあるフィールドデータのうち最新のステップのものを探してTimeStepに代入
     DIR* dp;
-    std::string dirname("./");
+    std::string dirname(GetPath());
     if((dp = opendir(dirname.c_str())) == NULL)
     {
         std::cerr<<"Couldn't open "<<dirname<<std::endl;
@@ -143,7 +143,7 @@ int MetaData::Read()
     while(entry != NULL)
     {
         std::string filename(entry->d_name);
-        if(filename.find(BaseFileName) != std::string::npos)
+        if(filename.find(Prefix) != std::string::npos)
         {
             //後ろから順にピリオドまでを削除
             //後ろから順に_までを取り出す
@@ -176,7 +176,9 @@ int MetaData::Write()
     TpHelper.write_header(out, "Header");
     WRITE_VALUE(Version);
     WRITE_VALUE(Endian);
-    WRITE_VALUE(BaseFileName);
+    WRITE_VALUE(Prefix);
+    WRITE_VALUE(DirectoryPath);
+    WRITE_VALUE(FieldFilenameFormat);
     TpHelper.write_value(out, "NumContainer", Containers.size());
     if(Units.size() > 0)
     {
@@ -376,18 +378,15 @@ bool MetaData::Compare(const MetaData& lhs) const
         std::cerr<<"FileName is differ"<<std::endl;
         return false;
     }
-    if(BaseFileName != lhs.BaseFileName)
+    if(Prefix != lhs.Prefix)
     {
-        std::cerr<<"BaseFileName is differ"<<std::endl;
+        std::cerr<<"Prefix is differ"<<std::endl;
         return false;
     }
-    for(int i = 0; i < 6; i++)
+    if(DirectoryPath != lhs.DirectoryPath)
     {
-        if(BoundingBox[i] != (lhs.BoundingBox)[i])
-        {
-            std::cerr<<"BoundingBox["<<i<<"]is differ"<<std::endl;
-            return false;
-        }
+        std::cerr<<"DirectoryPath is differ"<<std::endl;
+        return false;
     }
     if(GetNumContainers() != lhs.GetNumContainers())
     {
@@ -484,9 +483,17 @@ bool MetaData::Compare(const MetaData& lhs) const
 
 void MetaData::GetFileName(std::string* filename, const std::string& name, const int my_rank, const int& time_step) const
 {
-    *filename  = GetBaseFileName();
-    *filename += "_"+to_string(my_rank);
-    *filename += "_"+to_string(time_step);
+    *filename  = GetPath();
+    *filename += "/"; //path separator
+    *filename += GetBaseFileName();
+    if(FieldFilenameFormat == "rank_step")
+    {
+      *filename += "_"+to_string(my_rank);
+      *filename += "_"+to_string(time_step);
+    }else{
+      *filename += "_"+to_string(time_step);
+      *filename += "_"+to_string(my_rank);
+    }
     ContainerInfo container_info;
     GetContainerInfo(name, &container_info);
     *filename += "."+container_info.Suffix;

@@ -15,6 +15,10 @@
 #include <string>
 #include <glob.h>
 #include <mpi.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 #include "Utility.h"
 
 namespace
@@ -164,12 +168,12 @@ int stoi_wrapper(std::string str)
   return atoi(str.c_str());
 #endif
 }
-float stof_wrapper(std::string str)
+double stod_wrapper(std::string str)
 {
 #if __cplusplus >= 201103L
-  return std::stof(str);
+  return std::stod(str);
 #else
-  return (float)atof(str.c_str());
+  return atof(str.c_str());
 #endif
 }
 
@@ -268,5 +272,32 @@ size_t GetSize(SupportedType enumType)
     }
 
     return size_of_type;
+}
+
+bool mkdir_if_not_exist(const std::string& path)
+{
+  struct stat sb;
+  if(stat(path.c_str(), &sb)!=0 && errno==ENOENT)
+  {
+    return !mkdir(path.c_str(), 0777);
+  }
+  return S_ISDIR(sb.st_mode)? true : false;
+}
+
+bool RecursiveMkdir(const std::string& path)
+{
+  std::string target="";
+  for (std::string::const_iterator it=path.begin(); it!=path.end(); ++it)
+  {
+    if (*it == '/')
+    {
+      if(! mkdir_if_not_exist(target))
+      {
+        return false;
+      }
+    }
+    target+=*it;
+  }
+  return mkdir_if_not_exist(target);
 }
 } //end of namespace

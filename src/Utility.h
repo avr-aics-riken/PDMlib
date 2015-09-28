@@ -91,8 +91,8 @@ std::string to_string(T value)
 //! std::stringをintに変換
 int stoi_wrapper(std::string str);
 
-//! std::stringをfloatに変換
-float stof_wrapper(std::string str);
+//! std::stringをdoubleに変換
+double stod_wrapper(std::string str);
 
 //
 // UnitElem 構造体のソート用プレディケータ
@@ -134,5 +134,12 @@ StorageOrder string2enumStorageOrder(std::string stringStorageOrder);
 
 //! sizeof演算子の代替
 size_t GetSize(SupportedType enumType);
+
+
+/// 指定されたパスが存在しなければディレクトリを作成する
+bool mkdir_if_not_exist(const std::string& path);
+
+/// 再帰的に指定されたパスのディレクトリを作成する
+bool RecursiveMkdir(const std::string& path);
 } //end of namespace
 #endif

@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
     {
         PDMlib::PDMlib::GetInstance().Init(argc, argv, "PDMlibWriteSample.dfi");
         PDMlib::PDMlib::GetInstance().SetBaseFileName("PDMlibWriteSample");
+        PDMlib::PDMlib::GetInstance().SetFileNameFormat("Step_rank");
 
         PDMlib::ContainerInfo ID          = {"ParticleID", "ID_number", "zip", PDMlib::INT32, "id", 1};
         PDMlib::ContainerInfo Coordinate  = {"Coordinate", "N/A", "none", PDMlib::FLOAT, "geo", 3, PDMlib::IJKN};

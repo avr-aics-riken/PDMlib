@@ -229,6 +229,11 @@ int PDMlib::Write(const std::string& Name, const size_t& ContainerLength, T* Con
 
     if(pImpl->FirstCall)
     {
+        if(!RecursiveMkdir(pImpl->wMetaData->GetPath()))
+        {
+          std::cerr<<"mkdir faild! field data will be output to current directory!"<<std::endl;
+          pImpl->wMetaData->SetPath("./");
+        }
         pImpl->wMetaData->SetReadOnly();
         pImpl->wMetaData->Write();
         pImpl->FirstCall = false;
@@ -269,6 +274,28 @@ int PDMlib::SetBaseFileName(const std::string& FileName)
     return 0;
 }
 
+int PDMlib::SetFileNameFormat(const std::string& format)
+{
+    if(!pImpl->Initialized)
+    {
+        std::cerr<<"PDMlib::SetFileNameFormat() called before Init()"<<std::endl;
+        return -1;
+    }
+    pImpl->wMetaData->SetFileNameFormat(format);
+    return 0;
+}
+
+int PDMlib::SetPath(const std::string& path)
+{
+    if(!pImpl->Initialized)
+    {
+        std::cerr<<"PDMlib::SetPath() called before Init()"<<std::endl;
+        return -1;
+    }
+    pImpl->wMetaData->SetPath(path);
+    return 0;
+}
+
 std::vector<ContainerInfo>& PDMlib::GetContainerInfo(void)
 {
     static std::vector<ContainerInfo> container_info;
@@ -306,6 +333,11 @@ std::string PDMlib::GetBaseFileName(void)
     return pImpl->rMetaData->GetBaseFileName();
 }
 
+std::string PDMlib::GetPath(void)
+{
+    return pImpl->rMetaData->GetPath();
+}
+
 void PDMlib::GetBoundingBox(double* bbox)
 {
     pImpl->rMetaData->GetBoundingBox(bbox);
@@ -319,6 +351,7 @@ void PDMlib::SetBoundingBox(double* bbox)
 void PDMlib::SetComm(const MPI_Comm& comm)
 {
     pImpl->wMetaData->SetComm(comm);
+    pImpl->static_my_rank = pImpl->wMetaData->GetMyRank();
     if(pImpl->rMetaData != NULL)pImpl->rMetaData->SetComm(comm);
 }
 

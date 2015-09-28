@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef FV14WRITER_H
-#define FV14WRITER_H
+#ifndef FV14_WRITER_H
+#define FV14_WRITER_H
 #include <iostream>
 #include <fstream>
 #include <string>

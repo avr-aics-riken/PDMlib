@@ -26,10 +26,10 @@ void PrintUsageAndAbort(const char* cmd)
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
-void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::string* dir_name, std::string* dfi_filename, std::string* coordinate)
+void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::string* dfi_filename, std::string* coordinate)
 {
     int results = 0;
-    while((results = getopt(argc, argv, "s:e:c:d:f:")) != -1)
+    while((results = getopt(argc, argv, "s:e:c:f:")) != -1)
     {
         switch(results)
         {
@@ -43,10 +43,6 @@ void ComandLineParser(const int& argc, char** argv, int* start, int* end, std::s
 
         case 'c':
             *coordinate = optarg;
-
-        case 'd':
-            *dir_name = optarg;
-            break;
 
         case 'f':
             *dfi_filename = optarg;
@@ -69,11 +65,10 @@ int main(int argc, char* argv[])
 
     int start_time = -1;
     int end_time   = INT_MAX;
-    std::string dir_name("./");
     std::string dfi_filename;
     std::string coordinate("Coordinate");
     bool with_bbox = false;
-    ComandLineParser(argc, argv, &start_time, &end_time, &dir_name, &dfi_filename, &coordinate);
+    ComandLineParser(argc, argv, &start_time, &end_time, &dfi_filename, &coordinate);
     std::ifstream ifs(dfi_filename.c_str());
     if(ifs.fail())
     {
@@ -88,14 +83,14 @@ int main(int argc, char* argv[])
     // minimumのプロセス数以下でコンバータが動作するように制限する
 
     std::vector<std::string> filenames;
-    PDMlib::ListDirectoryContents(dir_name, &filenames);
+    PDMlib::ListDirectoryContents(pdmlib.GetPath(), &filenames);
 
-    const std::string base_filename = PDMlib::PDMlib::GetInstance().GetBaseFileName();
+    const std::string base_filename = pdmlib.GetBaseFileName();
     //TODO suffix listを取得し、filenamesから関係の無い拡張子のファイルを削除する
     //ListDirectoryContentsを拡張する形で実装する
 
     std::set<int> time_steps;
-    PDMlib::MakeTimeStepList(&time_steps, base_filename, dir_name, start_time, end_time);
+    PDMlib::MakeTimeStepList(&time_steps, base_filename, pdmlib.GetPath(), start_time, end_time);
     int min_timestep  = *time_steps.begin();
 
     int minimum_nproc = INT_MAX;
