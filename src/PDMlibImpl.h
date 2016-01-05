@@ -136,7 +136,7 @@ public:
     //! カレントディレクトリ以下にあるファイルを元にタイムステップのリストを作る
     void MakeTimeStep(std::set<int>* time_steps)
     {
-        MakeTimeStepList(time_steps, rMetaData->GetBaseFileName(), rMetaData->GetPath());
+        rMetaData->MakeTimeStepList(time_steps);
     }
 
     //! 読み込む対象のTimeStepを決める

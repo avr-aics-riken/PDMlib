@@ -9,6 +9,7 @@
 
 #ifndef VTK_WRITER_H
 #define VTK_WRITER_H
+#include <cstring>
 #include <string>
 #include <vector>
 #include <utility>

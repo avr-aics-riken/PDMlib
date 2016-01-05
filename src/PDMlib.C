@@ -296,6 +296,17 @@ int PDMlib::SetPath(const std::string& path)
     return 0;
 }
 
+int PDMlib::MakeTimeStepList(std::set<int>* time_steps, const int& start_time, const int& end_time, const std::string& wild_card) const
+{
+    if(!pImpl->Initialized)
+    {
+        std::cerr<<"PDMlib::MakeTimeStepList() called before Init()"<<std::endl;
+        return -1;
+    }
+  pImpl->rMetaData->MakeTimeStepList(time_steps, start_time, end_time, wild_card);
+  return 0;
+}
+
 std::vector<ContainerInfo>& PDMlib::GetContainerInfo(void)
 {
     static std::vector<ContainerInfo> container_info;

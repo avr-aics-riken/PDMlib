@@ -103,15 +103,21 @@ bool is_all_digit(const std::string& str)
     return true;
 }
 
-int get_time_step(const std::string& filename)
+int get_time_step(const std::string& filename, const bool& is_rank_step)
 {
-    int pos_period   = filename.find_last_of('.');
-    int pos_underbar = filename.find_last_of('_');
-    if(pos_period == std::string::npos || pos_underbar == std::string::npos)
+    int end   = filename.find_last_of('.');
+    int start = filename.find_last_of('_', end);
+    if(start == std::string::npos)
     {
         return -1;
     }
-    std::string str_time_step(filename.substr(pos_underbar+1, pos_period-(pos_underbar+1)));
+    if(!is_rank_step)
+    {
+      end=start;
+      start=filename.find_last_of('_', start-1);
+    }
+    std::string str_time_step(filename.substr(start+1, end-(start+1)));
+
     if(!is_all_digit(str_time_step))
     {
         return -2;
@@ -119,45 +125,9 @@ int get_time_step(const std::string& filename)
     return stoi_wrapper(str_time_step);
 }
 
-int get_region_number(const std::string& filename)
+int get_region_number(const std::string& filename, const bool& is_rank_step)
 {
-    int pos_underbar = filename.find_last_of('_');
-    if(pos_underbar == std::string::npos)
-    {
-        return -1;
-    }
-    std::string first_half(filename.substr(0, pos_underbar));
-    pos_underbar = first_half.find_last_of('_');
-    if(pos_underbar == std::string::npos)
-    {
-        return -1;
-    }
-    std::string str_region_number(first_half.substr(pos_underbar+1, std::string::npos));
-    if(!is_all_digit(str_region_number))
-    {
-        return -2;
-    }
-    return stoi_wrapper(str_region_number);
-}
-
-void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name, const int& start_time, const int& end_time, const std::string& wild_card)
-{
-    std::vector<std::string> filenames;
-    ListDirectoryContents(dir_name, &filenames, wild_card);
-    for(std::vector<std::string>::iterator it = filenames.begin(); it != filenames.end(); ++it)
-    {
-        if((*it).find(keyword) != std::string::npos)
-        {
-            int time_step = get_time_step(*it);
-            if(time_step >= 0)
-            {
-                if(start_time <= time_step && time_step <= end_time)
-                {
-                    time_steps->insert(time_step);
-                }
-            }
-        }
-    }
+    return get_time_step(filename, !is_rank_step);
 }
 
 int stoi_wrapper(std::string str)

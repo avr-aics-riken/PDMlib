@@ -480,6 +480,25 @@ bool MetaData::Compare(const MetaData& lhs) const
 
     return true;
 }
+void MetaData::MakeTimeStepList(std::set<int>* time_steps, const int& start_time, const int& end_time, const std::string& wild_card) const
+{
+    std::vector<std::string> filenames;
+    ListDirectoryContents(GetPath(), &filenames, wild_card);
+    for(std::vector<std::string>::iterator it = filenames.begin(); it != filenames.end(); ++it)
+    {
+        if((*it).find(GetBaseFileName()) != std::string::npos)
+        {
+            int time_step = get_time_step(*it, FieldFilenameFormat == "rank_step");
+            if(time_step >= 0)
+            {
+                if(start_time <= time_step && time_step <= end_time)
+                {
+                    time_steps->insert(time_step);
+                }
+            }
+        }
+    }
+}
 
 void MetaData::GetFileName(std::string* filename, const std::string& name, const int my_rank, const int& time_step) const
 {

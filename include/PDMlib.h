@@ -12,6 +12,8 @@
 #include <mpi.h>
 #include <string>
 #include <vector>
+#include <set>
+#include <climits>
 
 namespace PDMlib
 {
@@ -199,6 +201,11 @@ public:
     //!出力をバッファリングする最大の回数を取得します。
     int GetMaxBufferingTime(void);
 
+    //
+    // Utility function for converter
+    //
+    //! 存在するフィールドデータのファイルからタイムステップの一覧を作成して返す
+    int MakeTimeStepList(std::set<int>* time_steps, const int& start_time = 0, const int& end_time = INT_MAX, const std::string& wild_card="*") const;
 //
 //pimpl idiom
 //

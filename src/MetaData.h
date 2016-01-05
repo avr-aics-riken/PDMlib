@@ -191,6 +191,9 @@ namespace PDMlib
       //! 現在のタイムステップを返す
       int GetTimeStep(void) const {return this->TimeStep;}
 
+      //! 存在するフィールドデータのファイルからタイムステップの一覧を作成して返す
+      void MakeTimeStepList(std::set<int>* time_steps, const int& start_time = 0, const int& end_time = INT_MAX, const std::string& wild_card="*") const;
+
       //! 出力結果を読み込み直して、一致するかどうかをテストするためのルーチン
       //
       //! 通常の実行時(以前のジョブ実行結果を読み込む）は一致しないメンバも含まれるので
