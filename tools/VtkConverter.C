@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   // 時間方向でデータ分散
   std::set<int> time_steps;
   std::string   coord_suffix = "*."+coord_container.Suffix;
-  PDMlib::MakeTimeStepList(&time_steps, pdmlib.GetBaseFileName(), pdmlib.GetPath(), start_time, end_time, coord_suffix);
+  pdmlib.MakeTimeStepList(&time_steps, start_time, end_time, coord_suffix);
 
   std::set<int>::iterator my_start_time = time_steps.begin();
   std::set<int>::iterator my_end_time   = time_steps.begin();

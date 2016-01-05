@@ -44,30 +44,30 @@ int GetStartIndex(const int& N, const int& NumProc, const int& MyRank);
 //! glob(3)に対するラッパー
 void ListDirectoryContents(const std::string& dir_name, std::vector<std::string>* filenames, const std::string& wild_card = "*");
 
-//! 指定されたディレクトリ以下にあるファイルからタイムステップ部分を抜き出したもののリストを作る
-//
-//! keywordを含むファイル名から、一番右の'_'と'.'で囲まれた文字をintに変換したリストを作るだけなので
-//! この間に数字以外が含まれていると誤動作する
-void MakeTimeStepList(std::set<int>* time_steps, const std::string& keyword, const std::string& dir_name = "./", const int& start_time = 0, const int& end_time = INT_MAX, const std::string& wild_card = "*");
-
 //! @brief 引数で渡された文字列が全て数字かどうかを判定
 bool is_all_digit(const std::string& str);
 
 //! @brief 引数で渡された文字列からタイムステップと思われる数字を抽出して返す
 //
-//! 実際には文字列内の一番右にある'.'から一番右にある'_'までの部分を数値に変換して返している。
+//! 実際には文字列のsuffix(最後のピリオド以降)を除いた文字列から
+//! 最後のアンダーバー以降の文字列を抽出して返している
+//! オプション引数のrank_stepがfalseの時は末尾から2つ目のアンダーバーから
+//! 最後のアンダーバーまでの文字列を抽出して返している
 //
 //! @param [in] filename 抽出元の文字列
 //! @rt -1      filename中に'.'および'_'が1つも無かった
-int get_time_step(const std::string& filename);
+//! @rt -2      タイムステップと想定される文字列に数値以外の文字が含まれていた
+int get_time_step(const std::string& filename, const bool& is_rank_step);
 
 //! 引数で渡された文字列から領域番号と思われる数字を抽出して返す
 //
-//! 実際には文字列内の一番右にある'_'と右から二番目にある'_'までの部分を数値に変換して返している。
+//! 引数のrank_stepフラグを否定してget_time_stepを呼ぶだけ
 //
 //! @param [in] filename 抽出元の文字列
 //! @rt -1      filename中に'_'が2つ以上存在していなかった
-int get_region_number(const std::string& filename);
+//! @rt -2      領域番号と想定される文字列に数値以外の文字が含まれていた
+int get_region_number(const std::string& filename, const bool& is_rank_step);
+
 
 //
 // C++11非対応な環境向けの独自実装ルーチン

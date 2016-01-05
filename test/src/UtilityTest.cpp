@@ -49,66 +49,47 @@ TEST(IsAllDigitTest, float)
 
 TEST(GetTimeStepTest, ok)
 {
-    EXPECT_EQ(0,     PDMlib::get_time_step("foo_bar_baz_000000.c"));
-    EXPECT_EQ(1,     PDMlib::get_time_step("foo_bar_baz_000001.c"));
-    EXPECT_EQ(3,     PDMlib::get_time_step("foo_3.c"));
-    EXPECT_EQ(28710, PDMlib::get_time_step("foo_28710.c"));
+    EXPECT_EQ(0,     PDMlib::get_time_step("foo_bar_baz_000000.c", true));
+    EXPECT_EQ(1,     PDMlib::get_time_step("foo_bar_baz_000001.c", true));
+    EXPECT_EQ(3,     PDMlib::get_time_step("foo_3.c", true));
+    EXPECT_EQ(28710, PDMlib::get_time_step("foo_28710.c", true));
 }
 TEST(GetTimeStepTest, wrong)
 {
-    EXPECT_EQ(-1, PDMlib::get_time_step("28710.c"));
-    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_000000.c.hoge"));
-    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_000001.c.hoge"));
-    EXPECT_EQ(-1, PDMlib::get_time_step("foo_28710"));
-    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar.baz"));
-    EXPECT_EQ(-2, PDMlib::get_time_step("foo_2124_bar.baz"));
-    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_-00100.c"));
+    EXPECT_EQ(-1, PDMlib::get_time_step("28710.c", true));
+    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_000000.c.hoge", true));
+    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_000001.c.hoge", true));
+    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar.baz", true));
+    EXPECT_EQ(-2, PDMlib::get_time_step("foo_2124_bar.baz", true));
+    EXPECT_EQ(-2, PDMlib::get_time_step("foo_bar_baz_-00100.c", true));
 }
 TEST(GetRegionNumberTest, ok)
 {
-    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_3215.c"));
-    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_3215.c"));
-    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_3215.c.hoge"));
-    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_3215.c.hoge"));
-    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_3215.c"));
-    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_3215.c"));
-    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah.c"));
-    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah.c"));
-    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah.c.hoge"));
-    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah.c.hoge"));
-    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_aweqah.c"));
-    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_aweqah.c"));
-    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah"));
-    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah"));
-    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_aweqah"));
-    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_aweqah"));
-    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_hoge"));
+    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_3215.c", true));
+    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_3215.c", true));
+    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_3215.c.hoge", true));
+    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_3215.c.hoge", true));
+    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_3215.c", true));
+    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_3215.c", true));
+    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah.c", true));
+    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah.c", true));
+    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah.c.hoge", true));
+    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah.c.hoge", true));
+    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_aweqah.c", true));
+    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_aweqah.c", true));
+    EXPECT_EQ(0,     PDMlib::get_region_number("foo_bar_baz_000000_aweqah", true));
+    EXPECT_EQ(1,     PDMlib::get_region_number("foo_bar_baz_000001_aweqah", true));
+    EXPECT_EQ(3,     PDMlib::get_region_number("foo_3_aweqah", true));
+    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_aweqah", true));
+    EXPECT_EQ(28710, PDMlib::get_region_number("foo_28710_hoge", true));
 }
 TEST(GetRegionNumberTest, wrong)
 {
-    EXPECT_EQ(-1, PDMlib::get_region_number("28710"));
-    EXPECT_EQ(-1, PDMlib::get_region_number("28710_c"));
-    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz"));
-    EXPECT_EQ(-2, PDMlib::get_region_number("425_bar_210"));
-    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_3215.c"));
-    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_aweqah.c"));
-    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_aweqah"));
+    EXPECT_EQ(-1, PDMlib::get_region_number("28710", true));
+    EXPECT_EQ(28710, PDMlib::get_region_number("28710_c", true));
+    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz", true));
+    EXPECT_EQ(-2, PDMlib::get_region_number("425_bar_210", true));
+    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_3215.c", true));
+    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_aweqah.c", true));
+    EXPECT_EQ(-2, PDMlib::get_region_number("foo_bar_baz_-00100_aweqah", true));
 }
- 
- //! @brief 引数で渡された文字列からタイムステップと思われる数字を抽出して返す
- //
- //! 実際には文字列内の一番右にある'.'から一番右にある'_'までの部分を数値に変換して返している。
- //
- //! @param [in] filename 抽出元の文字列
- //! @rt -1      filename中に'.'および'_'が1つも無かった
- //int GetTimeStepTest(std::string& filename);
- 
- //! 引数で渡された文字列から領域番号と思われる数字を抽出して返す
- //
- //! 実際には文字列内の一番右にある'_'と右から二番目にある'_'までの部分を数値に変換して返している。
- //
- //! @param [in] filename 抽出元の文字列
- //! @rt -1      filename中に'_'が2つ以上存在していなかった
- //int GetRegionNumberTest(std::string& filename);
- 
-
