@@ -209,7 +209,7 @@ pushd BUILD
 export CC
 export CXX
 export FC
-cmake ../ -DCMAKE_INSTALL_PREFIX=${PREFIX}/PDMlib -DCMAKE_PREFIX_PATH=${PREFIX} -DTP_ROOT=${TextParser_path} -DZOLTAN_ROOT=${Zoltan_path} -DFPZIP_ROOT=${Fpzip_path}
+cmake ../ -Dbuild_h5part_converter=no -DCMAKE_INSTALL_PREFIX=${PREFIX}/PDMlib -DCMAKE_PREFIX_PATH=${PREFIX} -DTP_ROOT=${TextParser_path} -DZOLTAN_ROOT=${Zoltan_path} -DFPZIP_ROOT=${Fpzip_path}
 make install
 if [ $? -ne 0 ];then
   exit ${PDMLIB_BUILD_FAILED}

@@ -90,6 +90,12 @@ namespace PDMlib
         }
       }
 
+      //! フィールドデータ名のフォーマットがrank_stepかどうかを判定する
+      bool is_rank_step(void) const
+      {
+        return FieldFilenameFormat == "rank_step";
+      }
+
       //! フィールドデータを格納するディレクトリ名を指定する
       void SetPath(const std::string path){if(!ReadOnly)this->DirectoryPath= path;}
 

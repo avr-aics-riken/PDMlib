@@ -168,7 +168,7 @@ public:
     //! ファイル出力を行うプロセスが所属するコミュニケータを設定します
     void SetComm(const MPI_Comm& comm);
 
-    //! 出力ファイル名のフォーマットを指定する
+    //! 出力ファイル名のフォーマットを指定します
     int SetFileNameFormat(const std::string& format);
 
     //
@@ -185,6 +185,9 @@ public:
 
     //! 入力用として指定されたDFIファイルからBoundingBoxの情報を取得します
     void GetBoundingBox(double* bbox);
+
+    //! フィールドデータのファイル名フォーマットがrank_stepかどうかを判定します。
+    bool is_rank_step(void);
 
     //
     // Setter/Getter for PDMlib parameter

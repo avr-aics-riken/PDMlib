@@ -85,13 +85,10 @@ int main(int argc, char* argv[])
     std::vector<std::string> filenames;
     PDMlib::ListDirectoryContents(pdmlib.GetPath(), &filenames);
 
-    const std::string base_filename = pdmlib.GetBaseFileName();
-    //TODO suffix listを取得し、filenamesから関係の無い拡張子のファイルを削除する
-    //ListDirectoryContentsを拡張する形で実装する
-
     std::set<int> time_steps;
-    PDMlib::MakeTimeStepList(&time_steps, base_filename, pdmlib.GetPath(), start_time, end_time);
+    pdmlib.MakeTimeStepList(&time_steps, start_time, end_time);
     int min_timestep  = *time_steps.begin();
+    bool is_rank_step=pdmlib.is_rank_step();
 
     int minimum_nproc = INT_MAX;
     for(std::set<int>::iterator it_time = time_steps.begin(); it_time != time_steps.end(); ++it_time)
@@ -99,9 +96,9 @@ int main(int argc, char* argv[])
         std::set<int> ranks;
         for(std::vector<std::string>::iterator it_file = filenames.begin(); it_file != filenames.end(); ++it_file)
         {
-            if(PDMlib::get_time_step(*it_file) == *it_time)
+            if(PDMlib::get_time_step(*it_file, is_rank_step) == *it_time)
             {
-                ranks.insert(PDMlib::get_region_number(*it_file));
+                ranks.insert(PDMlib::get_region_number(*it_file, is_rank_step));
             }
         }
         minimum_nproc = minimum_nproc > *ranks.rbegin()+1 ? *ranks.rbegin()+1 : minimum_nproc;
