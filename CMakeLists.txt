@@ -20,11 +20,20 @@
 # -DCMAKE_BUILD_TYPE=DEBUG
 #    デバッグ版をビルドする (最適化オプション無し、計時機能off、デバッグ出力on)
 #
-# -Dbuild_samples=yes
-#    サンプルプログラムをビルドする (デフォルトoff)
+# -Dbuild_vtk_converter=[yes|no]
+#    VTKコンバータをビルドする (デフォルトyes)
 #
-# -Dbuild_tests=yes
-#    テストプログラムをビルドする (デフォルトoff)
+# -Dbuild_fv_converter=[yes|no]
+#    FieldViewコンバータプログラムをビルドする (デフォルトyes)
+#
+# -Dbuild_h5part_converter=[yes|no]
+#    H5Partコンバータをビルドする (デフォルトyes)
+#
+# -Dbuild_samples=[yes|no]
+#    サンプルプログラムをビルドする (デフォルトno)
+#
+# -Dbuild_tests=[yes|no]
+#    テストプログラムをビルドする (デフォルトno)
 #
 # -DFPZIP_ROOT=<path>
 #    Fpzipのインストール先を明示的に指定する (デフォルトは無指定)
@@ -42,13 +51,19 @@ project(PDMlib CXX)
 
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
 
-option(build_samples "build sample program for PDMlib" OFF)
-option(build_tests   "build test program for PDMlib" OFF)
+option(build_vtk_converter    "build VTK Converter"             ON)
+option(build_fv_converter     "build FV14 Converter"            ON)
+option(build_h5part_converter "build H5Part Converter"          ON)
+option(build_samples          "build sample program for PDMlib" OFF)
+option(build_tests            "build test program for PDMlib"   OFF)
 
 #ビルド設定の表示
 message( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
 message( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 message( STATUS "Destination PATH: " ${CMAKE_INSTALL_PREFIX})
+message( STATUS "build vtk converter: " ${build_vtk_converter})
+message( STATUS "build FV14 converter: " ${build_fv_converter})
+message( STATUS "build H5Part converter: " ${build_h5part_converter})
 message( STATUS "build sample program: " ${build_samples})
 message( STATUS "build test program: " ${build_tests})
 
@@ -97,9 +112,6 @@ set(MIGRATE_SAMPLE_SRC ${PROJECT_SOURCE_DIR}/example/migrate.cpp)
 ##############################################
 find_package (ZLIB REQUIRED)
 find_package (HDF5)
-if ( NOT HDF5_FOUND )
-    message("libhdf5 not found. H5PartConverter will not be build!")
-endif ( NOT HDF5_FOUND )
 find_package (TextParser REQUIRED)
 find_package (FPZIP      REQUIRED)
 find_package (Zoltan     REQUIRED)
@@ -118,9 +130,9 @@ set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
                     ${MPI_INCLUDE_PATH}
                    )
 include_directories(${INCLUDE_DIRS})
-if (HDF5_FOUND )
+if (build_h5part_converter)
 include_directories(${HDF5_INCLUDE_DIRS})
-endif(HDF5_FOUND)
+endif(build_h5part_converter)
 
 
 ##############################################
@@ -151,40 +163,47 @@ install (PROGRAMS ${PROJECT_SOURCE_DIR}/tools/stage.py DESTINATION bin)
 set (MANDATORY_LIBS PDM ${TextParser_LIBRARIES} ${ZLIB_LIBRARIES} ${FPZIP_LIBRARIES} ${Zoltan_LIBRARIES} ${MPI_LIBRARIES})
 
 # FV14用コンバータ
-add_executable(FV14Converter    ${FV14CONVERTER_SRC})
-target_link_libraries(FV14Converter   ${MANDATORY_LIBS})
-install (TARGETS  FV14Converter    DESTINATION bin)
-
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(FV14Converter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-if(MPI_LINK_FLAGS)
-  set_target_properties(FV14Converter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-endif()
+if (build_fv_converter)
+  add_executable(FV14Converter    ${FV14CONVERTER_SRC})
+  target_link_libraries(FV14Converter   ${MANDATORY_LIBS})
+  install (TARGETS  FV14Converter    DESTINATION bin)
+  if(MPI_COMPILE_FLAGS)
+    set_target_properties(FV14Converter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  endif()
+  if(MPI_LINK_FLAGS)
+    set_target_properties(FV14Converter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+  endif()
+endif (build_fv_converter)
 
 # HDF5用コンバータ
-if (HDF5_FOUND )
-add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
-target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
-install (TARGETS  H5PartConverter  DESTINATION bin)
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(H5PartConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-if(MPI_LINK_FLAGS)
-  set_target_properties(H5PartConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-endif()
-endif(HDF5_FOUND)
+if (build_h5part_converter)
+  if ( NOT HDF5_FOUND )
+    message("libhdf5 not found. H5PartConverter will not be build!")
+  else()
+    add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
+    target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
+    install (TARGETS  H5PartConverter  DESTINATION bin)
+    if(MPI_COMPILE_FLAGS)
+      set_target_properties(H5PartConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+    endif()
+    if(MPI_LINK_FLAGS)
+      set_target_properties(H5PartConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+    endif()
+  endif ( NOT HDF5_FOUND )
+endif(build_h5part_converter)
 
 #VTK用コンバータ
-add_executable(VtkConverter       ${VtkCONVERTER_SRC})
-target_link_libraries(VtkConverter ${MANDATORY_LIBS})
-install (TARGETS  VtkConverter    DESTINATION bin)
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(VtkConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-if(MPI_LINK_FLAGS)
-  set_target_properties(VtkConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-endif()
+if(build_vtk_converter)
+  add_executable(VtkConverter       ${VtkCONVERTER_SRC})
+  target_link_libraries(VtkConverter ${MANDATORY_LIBS})
+  install (TARGETS  VtkConverter    DESTINATION bin)
+  if(MPI_COMPILE_FLAGS)
+    set_target_properties(VtkConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  endif()
+  if(MPI_LINK_FLAGS)
+    set_target_properties(VtkConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+  endif()
+endif(build_vtk_converter)
 
 
 

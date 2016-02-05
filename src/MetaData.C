@@ -488,7 +488,7 @@ void MetaData::MakeTimeStepList(std::set<int>* time_steps, const int& start_time
     {
         if((*it).find(GetBaseFileName()) != std::string::npos)
         {
-            int time_step = get_time_step(*it, FieldFilenameFormat == "rank_step");
+            int time_step = get_time_step(*it, is_rank_step());
             if(time_step >= 0)
             {
                 if(start_time <= time_step && time_step <= end_time)
@@ -505,7 +505,7 @@ void MetaData::GetFileName(std::string* filename, const std::string& name, const
     *filename  = GetPath();
     *filename += "/"; //path separator
     *filename += GetBaseFileName();
-    if(FieldFilenameFormat == "rank_step")
+    if(is_rank_step())
     {
       *filename += "_"+to_string(my_rank);
       *filename += "_"+to_string(time_step);
