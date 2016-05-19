@@ -10,7 +10,7 @@
 ##############################################################################
 
 FPZIP=fpzip-1.0.1
-FPZIP_ARCHIVE=${FPZIP}.tar.gz
+FPZIP_ARCHIVE=${FPZIP}.tar_0.gz
 ZOLTAN=Zoltan_v3.81
 ZOLTAN_ARCHIVE=zoltan_distrib_v3.81.tar.gz
 TP=TextParser-1.6.3
@@ -201,10 +201,9 @@ if [  x${Hdf5_path} != x"" ];then
 fi
 
 #install PDMlib
-if [ -d BUILD ];then
-  rm -fr BUILD
+if [ ! -d BUILD ];then
+  mkdir BUILD
 fi
-mkdir BUILD
 pushd BUILD
 export CC
 export CXX
