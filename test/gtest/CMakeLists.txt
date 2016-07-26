@@ -8,14 +8,10 @@
 #
 ###################################################################################
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++03")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL Intel)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-elseif(CMAKE_CXX_COMPILER EQUAL '.*FCC.*')
-    #TODO google testのオプションをなんか変える？
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++03")
+if(CMAKE_CROSSCOMPILING)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1" CACHE STRING "" FORCE)
 endif()
 
 include_directories("../")
+message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
 add_library(gtest gtest-all.cc)

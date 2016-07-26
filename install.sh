@@ -65,7 +65,7 @@ if [ x${PREFIX} == x ];then
 fi
 
 #指定されたコンパイラ名を確認
-for comp in GNU INTEL FX10;
+for comp in GNU INTEL FX;
 do
   echo ${COMPILER} |grep -i ${comp} 1>/dev/null 2>&1 
   if [ $? -eq 0 ];then
@@ -85,6 +85,8 @@ fi
 MPICC=mpicc
 MPICXX=mpicxx
 MPIFC=mpif90
+CROSS=""
+TOOLCHAIN=""
 
 if [ x${BUILD_ENV} == "xGNU" ];then
   CC=gcc
@@ -99,13 +101,15 @@ elif [ x${BUILD_ENV} == "xINTEL" ];then
     MPICXX=mpiicpc
     MPIFC=mpiifort
   fi
-elif [ x${BUILD_ENV} == "xFX10" ];then
+elif [ x${BUILD_ENV} == "xFX" ];then
   CC=fccpx
   CXX=FCCpx
   FC=frtpx
   MPICC=mpifccpx
   MPICXX=mpiFCCpx
   MPIFC=mpifrtpx
+  CROSS="--host=sparc64-unknown-linux-gnu"
+  TOOLCHAIN="-DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_K.cmake"
 fi
 
 
@@ -158,7 +162,7 @@ if [ x${Zoltan_path} == x ];then
     mkdir BUILD
   fi
   cd BUILD
-  ../configure --with-id-type=ulong --prefix=${PREFIX}/Zoltan CC=${MPICC} FC=${MPIFC} CXX=${MPICXX} 
+  ../configure --with-id-type=ulong --prefix=${PREFIX}/Zoltan CC=${MPICC} FC=${MPIFC} CXX=${MPICXX} ${CROSS}
   make everything
   if [ $? -ne 0 ];then
     exit ${ZOLTAN_BUILD_FAILED}
@@ -208,7 +212,8 @@ pushd BUILD
 export CC
 export CXX
 export FC
-cmake ../ -Dbuild_h5part_converter=no -DCMAKE_INSTALL_PREFIX=${PREFIX}/PDMlib -DCMAKE_PREFIX_PATH=${PREFIX} -DTP_ROOT=${TextParser_path} -DZOLTAN_ROOT=${Zoltan_path} -DFPZIP_ROOT=${Fpzip_path}
+echo cmake  ${TOOLCHAIN} ../ -Dbuild_h5part_converter=no -DCMAKE_INSTALL_PREFIX=${PREFIX}/PDMlib -DCMAKE_PREFIX_PATH=${PREFIX} -DTP_ROOT=${TextParser_path} -DZOLTAN_ROOT=${Zoltan_path} -DFPZIP_ROOT=${Fpzip_path}
+cmake ${TOOLCHAIN} ../ -Dbuild_h5part_converter=no -DCMAKE_INSTALL_PREFIX=${PREFIX}/PDMlib -DCMAKE_PREFIX_PATH=${PREFIX} -DTP_ROOT=${TextParser_path} -DZOLTAN_ROOT=${Zoltan_path} -DFPZIP_ROOT=${Fpzip_path}
 make install
 if [ $? -ne 0 ];then
   exit ${PDMLIB_BUILD_FAILED}
