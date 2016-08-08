@@ -121,6 +121,7 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
 
     std::set<int> time_steps;
     pImpl->MakeTimeStep(&time_steps);
+    if(time_steps.size() <1) return 0;
     pImpl->DetermineTimeStep(TimeStep, time_steps);
     int& time_step = *TimeStep;
 
@@ -229,14 +230,21 @@ int PDMlib::Write(const std::string& Name, const size_t& ContainerLength, T* Con
 
     if(pImpl->FirstCall)
     {
-        if(!RecursiveMkdir(pImpl->wMetaData->GetPath()))
-        {
-          std::cerr<<"mkdir faild! field data will be output to current directory!"<<std::endl;
-          pImpl->wMetaData->SetPath("./");
-        }
         pImpl->wMetaData->SetReadOnly();
         pImpl->wMetaData->Write();
         pImpl->FirstCall = false;
+
+        // create directory by atomic operation in MPI world
+        for ( int i=0; i<pImpl->wMetaData->GetNumProc(); i++)
+        {
+          MPI_Barrier(pImpl->wMetaData->GetComm());
+          if(i != pImpl->wMetaData->GetMyRank()) continue;
+          if(!RecursiveMkdir(pImpl->wMetaData->GetPath()))
+          {
+            std::cerr<<"mkdir faild! field data will be output to current directory!"<<std::endl;
+            pImpl->wMetaData->SetPath("./");
+          }
+        }
     }
     //タイムスライス情報の出力
     pImpl->wMetaData->WriteTimeSlice(TimeStep, Time, MinMax, ContainerLength, Name);

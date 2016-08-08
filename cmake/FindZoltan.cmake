@@ -24,7 +24,6 @@ if(CMAKE_PREFIX_PATH)
   set(Zoltan_CANDIDATE_PATH ${CMAKE_PREFIX_PATH})
   file(GLOB tmp "${CMAKE_PREFIX_PATH}/[Zz][Oo][Ll][Tt][Aa][Nn]*/")
   list(APPEND Zoltan_CANDIDATE_PATH ${tmp})
-  message($tmp)
 endif()
 
 # Include dir

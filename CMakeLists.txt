@@ -45,7 +45,7 @@
 #    TextParserのインストール先を明示的に指定する (デフォルトは無指定)
 
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.1)
 
 project(PDMlib CXX)
 
@@ -106,16 +106,20 @@ set(RESTART_SAMPLE_SRC ${PROJECT_SOURCE_DIR}/example/restart.cpp)
 set(MIGRATE_SAMPLE_SRC ${PROJECT_SOURCE_DIR}/example/migrate.cpp)
 
 
-
 ##############################################
 # 依存するパッケージを探す
 ##############################################
-find_package (ZLIB REQUIRED)
+find_package (ZLIB       REQUIRED)
 find_package (HDF5)
 find_package (TextParser REQUIRED)
 find_package (FPZIP      REQUIRED)
 find_package (Zoltan     REQUIRED)
-find_package (MPI        REQUIRED)
+#次の条件判定は正確ではないが
+#Toolchain_Kを使っている時はコンパイラにmpi***pxを指定しているので
+#MPIライブラリの検出を行わないという挙動を意図している
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package (MPI REQUIRED)
+endif()
 
 
 ##############################################
@@ -131,7 +135,7 @@ set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
                    )
 include_directories(${INCLUDE_DIRS})
 if (build_h5part_converter)
-include_directories(${HDF5_INCLUDE_DIRS})
+  include_directories(${HDF5_INCLUDE_DIRS})
 endif(build_h5part_converter)
 
 
@@ -219,11 +223,15 @@ include_directories(${TEST_SRC_DIR})
 add_executable(WriteSample    ${WRITE_SAMPLE_SRC})
 add_executable(RestartSample  ${RESTART_SAMPLE_SRC})
 add_executable(MigrateSample  ${MIGRATE_SAMPLE_SRC})
+add_executable(EndianConversionTest_Write ${PROJECT_SOURCE_DIR}/example/write_test.cpp)
+add_executable(EndianConversionTest_Read  ${PROJECT_SOURCE_DIR}/example/read_test.cpp)
 
 #リンクするライブラリの指定
 target_link_libraries(WriteSample    ${MANDATORY_LIBS})
 target_link_libraries(RestartSample  ${MANDATORY_LIBS})
 target_link_libraries(MigrateSample  ${MANDATORY_LIBS})
+target_link_libraries(EndianConversionTest_Write ${MANDATORY_LIBS})
+target_link_libraries(EndianConversionTest_Read  ${MANDATORY_LIBS})
 
 # インストール
 install (PROGRAMS ${PROJECT_SOURCE_DIR}/test/migration_test.sh DESTINATION bin)
@@ -254,6 +262,7 @@ target_link_libraries(MigrationTest  ${MANDATORY_LIBS})
 
 # インストール
 install (TARGETS UnitTest DESTINATION bin)
+set_target_properties(UnitTest PROPERTIES COMPILE_FLAGS "${GTEST_CXX_FLAGS}")
 if(MPI_COMPILE_FLAGS)
   set_target_properties(UnitTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
   set_target_properties(MigrationTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")

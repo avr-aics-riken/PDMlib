@@ -202,15 +202,16 @@ public:
     {
         ContainerInfo container_info;
         rMetaData->GetContainerInfo(name, &container_info);
-        BaseIO::Read* reader = BaseIO::ReadFactory::create(container_info.Compression, enumType2string(container_info.Type), container_info.nComp);
         for(std::vector<std::string>::const_iterator it = filenames.begin(); it != filenames.end(); ++it)
         {
+            BaseIO::Read* reader = BaseIO::ReadFactory::create(*it, container_info.Compression, enumType2string(container_info.Type), container_info.nComp);
             size_t tmp;
             char** read_buff = new char*;
             *read_buff   = NULL;
-            size_t read_size = reader->read((*it).c_str(), tmp, read_buff);
+            size_t read_size = reader->read(tmp, read_buff);
             *total_size += read_size;
             buffers->push_back(std::make_pair(read_size, *read_buff));
+            delete reader;
         }
     }
 

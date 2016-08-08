@@ -26,11 +26,11 @@ protected:
     {
         data   = TestDataGenerator<double>::create(length, std::tr1::get<1>(GetParam()));
         writer = BaseIO::WriteFactory::create(std::tr1::get<0>(GetParam()), "double", 1);
-        reader = BaseIO::ReadFactory::create(std::tr1::get<0>(GetParam()), "double", 1);
         std::ostringstream oss;
         oss<<length;
         filename = std::tr1::get<0>(GetParam())+"_"+std::tr1::get<1>(GetParam())+"_"+oss.str()+".bin";
         writer->write(filename.c_str(), length*sizeof(double), length*sizeof(double), (char*)(data));
+        reader = BaseIO::ReadFactory::create(filename, std::tr1::get<0>(GetParam()), "double", 1);
     }
 
     ~EncodeDecodeTest()
@@ -51,7 +51,7 @@ TEST_P(EncodeDecodeTest, read)
 {
     double* read_data;
     size_t  tmp_size;
-        EXPECT_EQ(length*sizeof(double), reader->read(filename.c_str(), tmp_size, (char**)&read_data));
+        EXPECT_EQ(length*sizeof(double), reader->read(tmp_size, (char**)&read_data));
 
     for(int i = 0; i < length; i++)
     {

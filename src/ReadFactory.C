@@ -16,23 +16,24 @@
 
 namespace BaseIO
 {
-Read* ReadFactory::create(const std::string& decorator, const std::string& type, const int& NumComp)
+Read* ReadFactory::create(const std::string& filename, const std::string& decorator, const std::string& type, const int& NumComp)
 {
     int size_of_type = 1;
-    if(type == "int" || type == "unsigned int" || type == "float")
+    if(type == "INT32" || type == "uINT32" || type == "FLOAT")
     {
         size_of_type = 4;
-    }else if(type == "long" || type == "unsigned long" || type == "double"){
+    }else if(type == "INT64" || type == "uINT64" || type == "DOUBLE"){
         size_of_type = 8;
     }
 
-    Read* reader = new ReadBinaryFile(size_of_type);
+    Read* reader = new ReadBinaryFile(filename, size_of_type);
+    const bool need_endian_conversion = !(reader->isNativeEndian());
 
     //decoratorで指定された内容にしたがってDecoderを追加する
     std::istringstream iss(decorator);
     std::string piece;
     std::vector<std::string> decorator_container;
-    while(std::getline(iss, piece, '+'))
+    while(std::getline(iss, piece, '-'))
     {
         std::transform(piece.begin(), piece.end(), piece.begin(), tolower);
         if(piece == "zip" || piece == "fpzip" || piece == "rle")
@@ -59,6 +60,10 @@ Read* ReadFactory::create(const std::string& decorator, const std::string& type,
         }else{
             std::cerr<<"unknown decoder!!"<<std::endl;
         }
+    }
+    if(need_endian_conversion)
+    {
+      reader = new ConvertEndian(reader, size_of_type);
     }
 
     return reader;

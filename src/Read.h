@@ -28,45 +28,25 @@ class Read
 
 protected:
     Read(){}
+    Read(const std::string& arg_filename, const size_t& arg_size_of_datatype):filename(arg_filename), size_of_datatype(arg_size_of_datatype) {}
 
 public:
     virtual ~Read(){}
 
     //! *dataに、ファイルからデータを読み込む
-    //! @param [in]    filename     読み込み対象のファイル名
-    //! @param [out]   original_size    データ長（単位はByte)
-    //! @param [inout] **data       読み込んだデータを格納する領域へのポインタ
+    //! @param [out]   original_size      データ長（単位はByte)
+    //! @param [inout] **data             読み込んだデータを格納する領域へのポインタ
     //! @return -1: エラーによりデータが読めなかった
     //! @return  0: 指定されたファイルが存在しなかった
     //! @return >0: 実際に読み込んだデータサイズ(単位はByte)
-    virtual int read(const char* filename, size_t& original_size, char** data) = 0;
-};
+    virtual int read(size_t& original_size, char** data) = 0;
 
-//! 抽象ファイル読み込みクラス
-class ReadFile: public Read
-{
-public:
-    virtual ~ReadFile(){}
-    virtual int read(const char* filename, size_t& original_size, char** data) = 0;
+    //! ファイルに記録されたBOMが現在の処理系と一致するかどうか判定する
+    bool isNativeEndian();
 
 protected:
-    std::ifstream in;
-};
-
-//! バイナリ形式のファイルを読み込む具象クラス
-//
-class ReadBinaryFile: public ReadFile
-{
-    friend class ReadFactory;
-    ReadBinaryFile(const int& arg_size_of_datatype) : need_endian_convert(false),
-        size_of_datatype(arg_size_of_datatype){}
-
-public:
-    //! @attention 内部でnew char [] するので、*dataに確保済の領域を指定しないこと。
-    int read(const char* filename, size_t& original_size, char** data);
-
-private:
-    bool isNativeEndian(const int& byte_order_mark);
+    size_t size_of_datatype;
+    std::string filename;
 
     template<typename T>
     void convert_endian(T* value)
@@ -75,19 +55,22 @@ private:
         char* last  = first+sizeof(T);
         std::reverse(first, last);
     }
+    friend class ReadFactory;
+};
 
-    void convert_endian(char* data, const size_t& num_elements, const size_t& size_of_datatype)
-    {
-        for(int i = 0; i < num_elements; i++)
-        {
-            char* first = data+size_of_datatype*i;
-            char* last  = data+size_of_datatype*(i+1);
-            std::reverse(first, last);
-        }
-    }
+//! バイナリ形式のファイルを読み込む具象クラス
+//
+class ReadBinaryFile: public Read
+{
+    friend class ReadFactory;
+    ReadBinaryFile(const std::string& filename, const int& size_of_datatype): Read(filename, size_of_datatype) {}
 
-    bool   need_endian_convert;
-    size_t size_of_datatype;
+public:
+    //! @attention 内部でnew char [] するので、*dataに確保済の領域を指定しないこと。
+    int read(size_t& original_size, char** data);
+
+    //! 引数で渡されたBOMが現在の処理系のものと一致するかどうかを判定する
+    bool isNativeEndian(const int& byte_order_mark);
 };
 
 //
@@ -97,8 +80,7 @@ private:
 class Decoder: public Read
 {
 protected:
-    Decoder(Read* arg) : base(arg),
-        buff(NULL){}
+    Decoder(Read* arg) : base(arg), buff(NULL){}
 
 public:
     virtual ~Decoder()
@@ -106,7 +88,6 @@ public:
         delete base;
     }
 
-    virtual int read(const char* filename, size_t& original_size, char** data) = 0;
 
 protected:
     Read* base;
@@ -120,7 +101,7 @@ class ZipDecoder: public Decoder
     explicit ZipDecoder(Read* arg) : Decoder(arg){}
 
 public:
-    int read(const char* filename, size_t& original_size, char** data);
+    int read(size_t& original_size, char** data);
 };
 
 //! fpzip形式による伸張機能を提供する具象デコレータ
@@ -135,7 +116,7 @@ class FpzipDecoder: public Decoder
     }
 
 public:
-    int read(const char* filename, size_t& original_size, char** data);
+    int read(size_t& original_size, char** data);
 
 private:
     int dp;
@@ -146,17 +127,27 @@ private:
 class RLEDecoder: public Decoder
 {
     friend class ReadFactory;
-    explicit RLEDecoder(Read* arg) : Decoder(arg){}
+    explicit RLEDecoder(Read* arg) : Decoder(arg) {}
 
 public:
-    int read(const char* filename, size_t& original_size, char** data);
+    int read(size_t& original_size, char** data);
+};
+
+//! エンディアン変換機能を提供する具象デコレータ
+class ConvertEndian: public Decoder
+{
+    friend class ReadFactory;
+    explicit ConvertEndian(Read* arg, const int& arg_size_of_datatype) : Decoder(arg), size_of_datatype(arg_size_of_datatype) {}
+    int size_of_datatype;
+public:
+    int read(size_t& original_size, char** data);
 };
 
 //! Readクラス用シンプルファクトリ
 class ReadFactory
 {
 public:
-    static Read* create(const std::string& decorator, const std::string& type, const int& NumComp);
+    static Read* create(const std::string& filename, const std::string& decorator, const std::string& type, const int& NumComp);
 };
 } //end of namespace
 #endif
