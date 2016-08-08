@@ -20,9 +20,10 @@
 
 namespace BaseIO
 {
-int ReadBinaryFile::read(const char* filename, size_t& original_size, char** data)
-{
-    in.open(filename, std::ios::binary);
+  bool Read::isNativeEndian()
+  {
+    std::ifstream in;
+    in.open(filename.c_str(), std::ios::binary);
     if(in.fail())
     {
         std::cerr<<"file not found! ("<<filename<<")"<<std::endl;
@@ -33,7 +34,6 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
     in.read((char*)&size_of_int,    1);
     char size_of_size_t;
     in.read((char*)&size_of_size_t, 1);
-    //TODO size_of_intやsize_of_size_tの値を見て、byte_order_markなどの変数の型を変える
 
     int byte_order_mark;
     in.read((char*)&byte_order_mark, sizeof(byte_order_mark));
@@ -42,7 +42,33 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
         std::cerr<<"I/O error occurred"<<std::endl;
         return -1;
     }
-    need_endian_convert = !isNativeEndian(byte_order_mark);
+    in.close();
+    return byte_order_mark == BOM;
+  }
+
+int ReadBinaryFile::read(size_t& original_size, char** data)
+{
+    std::ifstream in;
+    in.open(filename.c_str(), std::ios::binary);
+    if(in.fail())
+    {
+        std::cerr<<"file not found! ("<<filename<<")"<<std::endl;
+        return 0;
+    }
+
+    char size_of_int;
+    in.read((char*)&size_of_int,    1);
+    char size_of_size_t;
+    in.read((char*)&size_of_size_t, 1);
+
+    int byte_order_mark;
+    in.read((char*)&byte_order_mark, sizeof(byte_order_mark));
+    if(in.fail())
+    {
+        std::cerr<<"I/O error occurred"<<std::endl;
+        return -1;
+    }
+    const bool need_endian_conversion = !isNativeEndian(byte_order_mark);
 
     in.read((char*)&original_size, sizeof(original_size));
     if(in.fail())
@@ -50,7 +76,7 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
         std::cerr<<"I/O error occurred"<<std::endl;
         return -1;
     }
-    if(need_endian_convert)
+    if(need_endian_conversion)
     {
         convert_endian(&original_size);
     }
@@ -62,7 +88,7 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
         std::cerr<<"I/O error occurred"<<std::endl;
         return -1;
     }
-    if(need_endian_convert)
+    if(need_endian_conversion)
     {
         convert_endian(&actual_size);
     }
@@ -74,10 +100,6 @@ int ReadBinaryFile::read(const char* filename, size_t& original_size, char** dat
         std::cerr<<"I/O error occurred"<<std::endl;
         return -1;
     }
-    if(need_endian_convert)
-    {
-        convert_endian(*data, actual_size, size_of_datatype);
-    }
     in.close();
     return actual_size;
 }
@@ -87,9 +109,9 @@ bool ReadBinaryFile::isNativeEndian(const int& byte_order_mark)
     return byte_order_mark == BOM;
 }
 
-int ZipDecoder::read(const char* filename, size_t& original_size, char** data)
+int ZipDecoder::read(size_t& original_size, char** data)
 {
-    size_t src_size = base->read(filename, original_size, data);
+    size_t src_size = base->read(original_size, data);
     if(src_size <= 0)
     {
         return src_size;
@@ -111,9 +133,9 @@ int ZipDecoder::read(const char* filename, size_t& original_size, char** data)
     return dest_size;
 }
 
-int FpzipDecoder::read(const char* filename, size_t& original_size, char** data)
+int FpzipDecoder::read(size_t& original_size, char** data)
 {
-    size_t src_size = base->read(filename, original_size, data);
+    size_t src_size = base->read(original_size, data);
     if(src_size <= 0)
     {
         return src_size;
@@ -133,13 +155,13 @@ int FpzipDecoder::read(const char* filename, size_t& original_size, char** data)
         *data = buff;
         buff  = NULL;
     }
-    // fpzip_memory_readの戻り値は実際に読んだ（伸長前の）データサイズ
+    // fpzip_memory_readの戻り値は実際に読んだ（伸長前の）データサイズなのでdest_sizeは返さない
     return original_size;
 }
 
-int RLEDecoder::read(const char* filename, size_t& original_size, char** data)
+int RLEDecoder::read(size_t& original_size, char** data)
 {
-    size_t src_size = base->read(filename, original_size, data);
+    size_t src_size = base->read(original_size, data);
     if(src_size <= 0)
     {
         return src_size;
@@ -159,5 +181,17 @@ int RLEDecoder::read(const char* filename, size_t& original_size, char** data)
         buff  = NULL;
     }
     return dest_size;
+}
+int ConvertEndian::read(size_t& original_size, char** data)
+{
+    size_t size_in_byte = base->read(size_in_byte, data);
+    size_t num_elements=size_in_byte/size_of_datatype;
+    for(int i = 0; i < num_elements; i++)
+    {
+      char* first = *data+size_of_datatype*i;
+      char* last  = *data+size_of_datatype*(i+1);
+      std::reverse(first, last);
+    }
+    return size_in_byte;
 }
 } //end of namespace

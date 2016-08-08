@@ -29,7 +29,7 @@ Write* WriteFactory::create(const std::string& decorator, const std::string& typ
         std::istringstream iss(decorator);
         std::string piece;
         std::vector<std::string> decorator_container;
-        while(std::getline(iss, piece, '+'))
+        while(std::getline(iss, piece, '-'))
         {
             std::transform(piece.begin(), piece.end(), piece.begin(), tolower);
             if(piece == "zip" || piece == "fpzip" || piece == "rle")

@@ -34,7 +34,7 @@ protected:
         filename = std::tr1::get<1>(GetParam())+"_int_"+oss.str();
         BaseIO::Write* writer;
         filename += ".bin";
-        reader    = BaseIO::ReadFactory::create("", "int", 1);
+        reader    = BaseIO::ReadFactory::create(filename, "", "int", 1);
         writer    = BaseIO::WriteFactory::create("", "int", 1);
         const int length = std::tr1::get<0>(GetParam())*sizeof(data[0]);
         writer->write(filename.c_str(), length, length, (char*)(data));
@@ -56,7 +56,7 @@ TEST_P(ReadFileTestWithIntData, read)
 {
     int*   read_data;
     size_t length = std::tr1::get<0>(GetParam())*sizeof(read_data[0]);
-        EXPECT_EQ(length,  reader->read(filename.c_str(), length, (char**)&read_data));
+        EXPECT_EQ(length,  reader->read(length, (char**)&read_data));
     for(int i = 0; i < std::tr1::get<0>(GetParam()); i++)
     {
         EXPECT_EQ(data[i], read_data[i]);
@@ -76,7 +76,7 @@ protected:
         filename = std::tr1::get<1>(GetParam())+"_long_"+oss.str();
         BaseIO::Write* writer;
         filename += ".bin";
-        reader    = BaseIO::ReadFactory::create("", "long", 1);
+        reader    = BaseIO::ReadFactory::create(filename, "", "long", 1);
         writer    = BaseIO::WriteFactory::create("", "long", 1);
         const int length = std::tr1::get<0>(GetParam())*sizeof(data[0]);
         writer->write(filename.c_str(), length, length, (char*)(data));
@@ -98,7 +98,7 @@ TEST_P(ReadFileTestWithLongData, read)
 {
     long*  read_data;
     size_t length = std::tr1::get<0>(GetParam())*sizeof(read_data[0]);
-        EXPECT_EQ(length,  reader->read(filename.c_str(), length, (char**)&read_data));
+        EXPECT_EQ(length,  reader->read(length, (char**)&read_data));
     for(int i = 0; i < std::tr1::get<0>(GetParam()); i++)
     {
         EXPECT_EQ(data[i], read_data[i]);
@@ -118,7 +118,7 @@ protected:
         filename = std::tr1::get<1>(GetParam())+"_float_"+oss.str();
         BaseIO::Write* writer;
         filename += ".bin";
-        reader    = BaseIO::ReadFactory::create("", "float", 1);
+        reader    = BaseIO::ReadFactory::create(filename, "", "float", 1);
         writer    = BaseIO::WriteFactory::create("", "float", 1);
         const int length = std::tr1::get<0>(GetParam())*sizeof(data[0]);
         writer->write(filename.c_str(), length, length, (char*)(data));
@@ -140,7 +140,7 @@ TEST_P(ReadFileTestWithFloatData, read)
 {
     float* read_data;
     size_t length = std::tr1::get<0>(GetParam())*sizeof(read_data[0]);
-        EXPECT_EQ(length,  reader->read(filename.c_str(), length, (char**)&read_data));
+        EXPECT_EQ(length,  reader->read(length, (char**)&read_data));
     for(int i = 0; i < std::tr1::get<0>(GetParam()); i++)
     {
         EXPECT_EQ(data[i], read_data[i]);
@@ -160,7 +160,7 @@ protected:
         filename = std::tr1::get<1>(GetParam())+"_double_"+oss.str();
         BaseIO::Write* writer;
         filename += ".bin";
-        reader    = BaseIO::ReadFactory::create("", "double", 1);
+        reader    = BaseIO::ReadFactory::create(filename, "", "double", 1);
         writer    = BaseIO::WriteFactory::create("", "double", 1);
         size_t length = std::tr1::get<0>(GetParam())*sizeof(data[0]);
         writer->write(filename.c_str(), length, length, (char*)(data));
@@ -182,7 +182,7 @@ TEST_P(ReadFileTestWithDoubleData, read)
 {
     double* read_data;
     size_t  length = std::tr1::get<0>(GetParam())*sizeof(read_data[0]);
-        EXPECT_EQ(length,  reader->read(filename.c_str(), length, (char**)&read_data));
+        EXPECT_EQ(length,  reader->read(length, (char**)&read_data));
     for(int i = 0; i < std::tr1::get<0>(GetParam()); i++)
     {
         EXPECT_EQ(data[i], read_data[i]);
