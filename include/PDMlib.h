@@ -142,7 +142,6 @@ public:
     //! @return  0以上 正常終了（出力サイズが返ってくる）
     //! @return -1     Init()が呼ばれる前に呼ばれた
     //! @return -2     Tagの値が不正値 （負またはコンテナ数以上の値）
-    //! @return -3     ContainerLengthが不正値 (負の値）
     //! @return -4     ContaierにNULLポインタが指定されていた
     //! @return -5     NumCompが不正値（1または3以外の値）
     //! @return -6     TimeStepが不正値（負の値）

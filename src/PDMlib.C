@@ -22,6 +22,7 @@
 #include "Read.h"
 #include "Utility.h"
 
+
 //! @file PDMlibのコンストラクタ/デストラクタ/publicメソッドの実装
 namespace PDMlib
 {
@@ -207,11 +208,6 @@ int PDMlib::Write(const std::string& Name, const size_t& ContainerLength, T* Con
         std::cerr<<"PDMlib::Write(): "<<Name<<" is not found in MetaDataFile"<<std::endl;
         return -2;
     }
-    if(ContainerLength <= 0)
-    {
-        std::cerr<<"PDMlib::Write(): ContainerLength must be positive number ("<<ContainerLength<<")"<<std::endl;
-        return -3;
-    }
     if(Container == NULL)
     {
         std::cerr<<"PDMlib::Write(): Null pointer is passed as Container pointer of pointer"<<std::endl;
@@ -250,6 +246,12 @@ int PDMlib::Write(const std::string& Name, const size_t& ContainerLength, T* Con
     pImpl->wMetaData->WriteTimeSlice(TimeStep, Time, MinMax, ContainerLength, Name);
     std::string filename;
     pImpl->wMetaData->GetFileName(&filename, Name, pImpl->wMetaData->GetMyRank(), TimeStep);
+
+    //出力するデータサイズが0の時はタイムスライスだけ出力して終了
+    if(ContainerLength == 0)
+    {
+      return 0;
+    }
 
     //フィールドデータの出力
     ContainerInfo  container_info;
