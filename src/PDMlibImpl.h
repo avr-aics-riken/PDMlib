@@ -15,6 +15,8 @@
 #include "Utility.h"
 #include "MetaData.h"
 #include "Read.h"
+#include <omp.h>
+#include <set>
 
 //forward declaration
 namespace BaseIO
@@ -43,24 +45,71 @@ public:
         FirstCall(true),
         WriteDFI_FileName("PDMlib.dfi"),
         rMetaData(NULL),
-        wMetaData(NULL)
+        wMetaData(NULL),
+        PM(false)
     {}
 
     ~Impl()
     {
+        int myrank=wMetaData->GetMyRank();
         delete wMetaData;
         wMetaData = NULL;
         delete rMetaData;
         rMetaData = NULL;
-        for(std::set<ContainerPointer*>::iterator it = ContainerTable.begin(); it != ContainerTable.end(); ++it)
+        for(std::vector<ContainerPointer*>::iterator it = ContainerTable.begin(); it != ContainerTable.end(); ++it)
         {
             delete *it;
         }
+        if(PM)
+        {
+          std::stringstream ss;
+          ss <<"PDMlibPerformance_"<<myrank<<".txt";
+          std::ofstream out(ss.str().c_str());
+          out<< "elapsed time"<<std::endl;
+          for( std::map<std::string, double>::iterator it = elapse.begin(); it!= elapse.end(); ++it)
+          {
+            out<<it->first<<", "<<it->second<<std::endl;
+          }
+        }
+    }
+    void pm_begin(const std::string& label)
+    {
+      if(!PM) return;
+      std::map<std::string, double>::iterator it_t0 = t0.find(label);
+      if (it_t0 != t0.end())
+      {
+          std::cerr <<"WARN: pm_begin() is called with "<<label<<" more than 2 times!"<<std::endl;
+      }else{
+        t0[label]=MPI_Wtime();
+      }
     }
 
-    void Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string&  ReadMetaDataFile)
+    void pm_end(const std::string& label)
+    {
+      if(!PM) return;
+      double now=MPI_Wtime();
+      std::map<std::string, double>::iterator it_t0 = t0.find(label);
+      if (it_t0 == t0.end())
+      {
+          std::cerr <<"WARN: "<<label<<" section is not started!"<<std::endl;
+      }else{
+        double start=it_t0->second;
+        t0.erase(it_t0);
+
+        std::map<std::string, double>::iterator it_elapse = elapse.find(label);
+        if (it_elapse != elapse.end())
+        {
+          elapse[label]+=now-start;
+        }else{
+          elapse[label]=now-start;
+        }
+      }
+    }
+
+    void Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string&  ReadMetaDataFile, const bool& Timing)
     {
         if(Initialized)return;
+        PM=Timing;
 
         if(!WriteMetaDataFile.empty())
         {
@@ -317,6 +366,7 @@ public:
     template<typename T>
     void migrate_container(T** Container, size_t* ContainerLength, int* recv_counts, const size_t nComp, const std::vector<std::vector<ZOLTAN_ID_TYPE>*>& export_objs)
     {
+        pm_begin("migrate_container: prepare to receive");
         // 受信バッファを確保しつつMPI_Irecvを発行
         const int    num_procs  = export_objs.size();
         T**          recv_buffs = new T*[num_procs];
@@ -335,45 +385,58 @@ public:
             }
             src_rank++;
         }
+        pm_end("migrate_container: prepare to receive");
+        pm_begin("migrate_container: prepare to send");
 
-        std::vector<std::vector<T>*> send_buffs(num_procs);
+        // count number of items to send
+        std::vector<T*> send_buffs(num_procs);
+        std::vector<int> indices(num_procs);
         for(int i = 0; i < num_procs; i++)
         {
-            send_buffs[i] = new std::vector<T>;
+          if((export_objs[i])->size() > 0)
+          {
+            send_buffs[i] = new T [(export_objs[i])->size() * nComp];
+          }else{
+            send_buffs[i] = NULL;
+          }
+          indices[i]=0;
         }
 
-        // 転送するデータを転送バッファにコピーしつつ、元のデータを前に寄せる
-        std::vector<std::vector<ZOLTAN_ID_TYPE>::iterator> memo(num_procs);
-        for(int i = 0; i < num_procs; i++)
+        // 転送するデータを転送バッファにコピー
+        std::vector<ZOLTAN_ID_TYPE> export_ids;
+        for(int dst_rank = 0; dst_rank < num_procs; dst_rank++)
         {
-            memo[i] = export_objs[i]->begin();
+          for (std::vector<ZOLTAN_ID_TYPE>::iterator it = export_objs[dst_rank]->begin(); it != export_objs[dst_rank]->end(); ++it)
+          {
+            for ( int i=0; i<nComp; i++)
+            {
+              send_buffs[dst_rank][indices[dst_rank]]=(*Container)[(*it)*nComp+i];
+              indices[dst_rank]=indices[dst_rank]+1;
+              export_ids.push_back((*it)*nComp+i);
+            }
+          }
         }
 
-        int index = 0;
-        for(int i = 0; i < *ContainerLength;)
+        //元のデータを前に寄せる
+        int index_keep = 0;
+        if(export_ids.size()>0)
         {
-            bool send_flag = false;
-            for(int dst_rank = 0; dst_rank < num_procs; dst_rank++)
+          std::sort(export_ids.begin(), export_ids.end());
+          std::vector<ZOLTAN_ID_TYPE>::iterator it=export_ids.begin();
+          for(int i = 0; i < *ContainerLength; i++)
+          {
+            if(i==*it)
             {
-                std::vector<ZOLTAN_ID_TYPE>::iterator result = std::find(memo[dst_rank], export_objs[dst_rank]->end(), i/nComp);
-                if(result != export_objs[dst_rank]->end())
-                {
-                    memo[dst_rank] = result;
-                    send_buffs[dst_rank]->push_back((*Container)[i++]);
-                    if(nComp == 3)
-                    {
-                        send_buffs[dst_rank]->push_back((*Container)[i++]);
-                        send_buffs[dst_rank]->push_back((*Container)[i++]);
-                    }
-                    send_flag = true;
-                    break;
-                }
+              ++it;
+            }else{
+              (*Container)[index_keep++] = (*Container)[i];
             }
-            if(!send_flag)
-            {
-                (*Container)[index++] = (*Container)[i++];
-            }
+          }
+        }else{
+          index_keep=*ContainerLength;
         }
+        pm_end("migrate_container: prepare to send");
+        pm_begin("migrate_container: call MPI_Send");
         int dst_rank = 0;
         int tag      = 0;
         for(std::vector<std::vector<ZOLTAN_ID_TYPE>*>::const_iterator it = export_objs.begin(); it != export_objs.end(); ++it)
@@ -381,15 +444,19 @@ public:
             int send_count = ((*it)->size())*nComp;
             if(send_count > 0)
             {
-                Send(&(send_buffs[dst_rank]->front()), send_count, dst_rank, tag++, wMetaData->GetComm());
+                Send(send_buffs[dst_rank], send_count, dst_rank, tag++, wMetaData->GetComm());
             }
             dst_rank++;
         }
+        pm_end("migrate_container: call MPI_Send");
+        pm_begin("migrate_container: call MPI_Send 2");
         MPI_Barrier(wMetaData->GetComm()); // 送信しないRankが通り抜けてしまうので、この位置でのBarrierは必須
+        pm_end("migrate_container: call MPI_Send 2");
+        pm_begin("migrate_container: unpack recieved data");
 
         // 受信したデータ+転送しなかったデータのサイズで領域を確保
-        int room           = *ContainerLength-index; // 送信データ数(=確保済領域の空きサイズを計算)
-        *ContainerLength -= room;                    // 送信したデータ数をContainerLengthから引く
+        int room           = *ContainerLength-index_keep; // 送信データ数(=確保済領域の空きサイズを計算)
+        *ContainerLength   = index_keep;                  // ContainerLengthを未送信データ数で置き換える
         int sum_recv_count = 0;
         for(int i = 0; i < num_procs; i++)
         {
@@ -399,12 +466,12 @@ public:
         {
             if(*Container == NULL)
             {
-                *Container = new T[index+sum_recv_count];
+                *Container = new T[index_keep+sum_recv_count];
             }else{
                 //reallocate
                 T* tmp = *Container;
-                *Container = new T[index+sum_recv_count];
-                for(int i = 0; i < index; i++)
+                *Container = new T[index_keep+sum_recv_count];
+                for(int i = 0; i < index_keep; i++)
                 {
                     (*Container)[i] = tmp[i];
                 }
@@ -412,20 +479,22 @@ public:
         }
 
         //受信バッファを元データの末尾に追加
-        int counter = 0;
+        int recieved_size= 0;
         for(int src_rank = 0; src_rank < num_procs; src_rank++)
         {
-            counter += recv_counts[src_rank]*nComp;
-            for(int i = 0; i < recv_counts[src_rank]*nComp; i++)
-            {
-                (*Container)[index++] = recv_buffs[src_rank][i];
-            }
+          recieved_size+= recv_counts[src_rank]*nComp;
+          for(int i = 0; i < recv_counts[src_rank]*nComp; i++)
+          {
+            (*Container)[index_keep++] = recv_buffs[src_rank][i];
+          }
         }
-        *ContainerLength += counter;
+        *ContainerLength += recieved_size;
+        pm_end("migrate_container: unpack recieved data");
+        pm_begin("migrate_container: post process");
 
-        for(typename std::vector<std::vector<T>*>::iterator it = send_buffs.begin(); it != send_buffs.end(); ++it)
+        for(typename std::vector<T*>::iterator it = send_buffs.begin(); it != send_buffs.end(); ++it)
         {
-            delete *it;
+            delete[] *it;
         }
         delete[] requests;
         for(int i = 0; i < num_procs; i++)
@@ -433,6 +502,7 @@ public:
             delete[] recv_buffs[i];
         }
         delete[] recv_buffs;
+        pm_end("migrate_container: post process");
     }
 
     void migrate_container_selector(ContainerPointer* container, int* recv_counts, const std::vector<std::vector<ZOLTAN_ID_TYPE>*>& export_objs)
@@ -498,6 +568,7 @@ public:
 
     bool Migrate()
     {
+        pm_begin("Migrate: setup Zoltan");
         MPI_Comm comm = wMetaData->GetComm();
         Zoltan*  zz   = new Zoltan(comm);
         if(zz == NULL)
@@ -536,9 +607,13 @@ public:
         int*          exportProcs;
         int*          exportToPart;
 
+        pm_end("Migrate: setup Zoltan");
+        pm_begin("Migrate: Zoltan::LB_Partition");
         int rc = zz->LB_Partition(changes, numGidEntries, numLidEntries,
                                   numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
                                   numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
+        pm_end("Migrate: Zoltan::LB_Partition");
+        pm_begin("Migrate: check return code of Zoltan::LB_Partition");
         int max_rc;
         int min_rc;
         MPI_Allreduce(&rc, &max_rc, 1, MPI_INT, MPI_MAX, comm);
@@ -548,6 +623,8 @@ public:
             std::cerr<<"Zoltan LB_Partition failed!"<<std::endl;
             return false;
         }
+        pm_end("Migrate: check return code of Zoltan::LB_Partition");
+        pm_begin("Migrate: prepare to receive");
 
         // LB_Partitionの結果を元に相手プロセス毎の受信オブジェクト数リストを作成
         const int num_procs   = wMetaData->GetNumProc();
@@ -560,9 +637,11 @@ public:
         {
             ++(recv_counts[importProcs[i]]);
         }
+        pm_end("Migrate: prepare to receive");
+        pm_begin("Migrate: prepare to send");
 
         // LB_Partitionの結果を元に相手プロセス毎の送信オブジェクトのリストを作成
-        // 本当は外側のvectorはarrayにしたいがC++11非対応の環境向けにvectorにしている
+        // 本当は外側のvectorはarrayで十分だがC++11非対応の環境向けにvectorにしている
         std::vector<std::vector<ZOLTAN_ID_TYPE>*> export_objs(num_procs);
         for(int i = 0; i < num_procs; i++)
         {
@@ -575,9 +654,11 @@ public:
 
         Zoltan::LB_Free_Part(&importGlobalIds, &importLocalIds, &importProcs, &importToPart);
         Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
+        pm_end("Migrate: prepare to send");
+        pm_begin("Migrate: do migration");
 
         // コンテナ毎にマイグレーションを実行
-        for(std::set<ContainerPointer*>::iterator it = ContainerTable.begin(); it != ContainerTable.end(); ++it)
+        for(std::vector<ContainerPointer*>::iterator it = ContainerTable.begin(); it != ContainerTable.end(); ++it)
         {
             migrate_container_selector(*it, recv_counts, export_objs);
         }
@@ -587,6 +668,7 @@ public:
             delete *it;
         }
         delete zz;
+        pm_end("Migrate: do migration");
         return true;
     }
 
@@ -758,39 +840,21 @@ public:
         return 3;
     }
 
-    //! 座標情報を保存したコンテナ
-    static ContainerPointer* CoordinateContainer;
+    static ContainerPointer* CoordinateContainer;   //< 座標情報を保存したコンテナ
+    static int static_my_rank;                      //< 自Rankのランク番号
+    std::vector<ContainerPointer*> ContainerTable;  //< RegisterContainer()で渡されたポインタを登録するテーブル
+    int BufferSize;                                 //< ファイル出力バッファのサイズ 単位はMiB
+    int MaxBufferingTime;                           //< ファイル出力をバッファリングする回数
+    std::string ReadDFI_FileName;                   //< 読み出すDFIファイルの名前
+    std::string WriteDFI_FileName;                  //< 書きみ出すDFIファイルの名前
+    bool Initialized;                               //< 初期化済を示すフラグ
+    bool FirstCall;                                 //< Writeの呼び出しが1回目か2回目以降かを示すフラグ
+    MetaData* rMetaData;                            //< ファイル入力用のメタデータオブジェクトへのポインタ
+    MetaData* wMetaData;                            //< ファイル出力用のメタデータオブジェクトへのポインタ
+    bool PM;                                        //< 計時機能を有効にするかどうかのフラグ
+    std::map<std::string, double>  elapse;          //< 計時結果を保存するテーブル
+    std::map<std::string, double>  t0;              //< 計時開始時刻を保存するテーブル
 
-    //! 自Rankのランク番号
-    //
-    static int static_my_rank;
-
-    //! RegisterContainer()で渡されたポインタを登録するテーブル
-    std::set<ContainerPointer*> ContainerTable;
-
-    //! ファイル出力バッファのサイズ 単位はMiB
-    int BufferSize;
-
-    //! ファイル出力をバッファリングする回数
-    int MaxBufferingTime;
-
-    //! 読み出すDFIファイルの名前
-    std::string ReadDFI_FileName;
-
-    //! 書きみ出すDFIファイルの名前
-    std::string WriteDFI_FileName;
-
-    //! 初期化済を示すフラグ
-    bool Initialized;
-
-    //! Writeの呼び出しが1回目か2回目以降かを示すフラグ
-    bool FirstCall;
-
-    //! ファイル入力用のメタデータオブジェクトへのポインタ
-    MetaData* rMetaData;
-
-    //! ファイル出力用のメタデータオブジェクトへのポインタ
-    MetaData* wMetaData;
 };
 
 ContainerPointer* PDMlib::Impl::CoordinateContainer;

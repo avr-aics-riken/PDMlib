@@ -34,9 +34,9 @@ PDMlib::~PDMlib()
     pImpl = NULL;
 }
 
-void PDMlib::Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string& ReadMetaDataFile)
+void PDMlib::Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string& ReadMetaDataFile, const bool& Timing)
 {
-    pImpl->Init(argc, argv, WriteMetaDataFile, ReadMetaDataFile);
+    pImpl->Init(argc, argv, WriteMetaDataFile, ReadMetaDataFile, Timing);
 }
 
 template<typename T>
@@ -106,14 +106,18 @@ int PDMlib::RegisterContainer(const std::string& Name, T** Container) const
     tmp->buff            = NULL;
     tmp->nComp           = container_info.nComp;
 
-    std::pair<std::set<ContainerPointer*>::iterator, bool> result = (pImpl->ContainerTable).insert(tmp);
-    if(!result.second)return -2;
-
+    // 既に登録済のものと重複していないかチェック
+    for(std::vector<ContainerPointer*>::iterator it=(pImpl->ContainerTable).begin(); it!=(pImpl->ContainerTable).end(); ++it)
+    {
+      if(*it == tmp) return -2;
+    }
+    (pImpl->ContainerTable).push_back(tmp);
     return 0;
 }
 
 size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::string& CoordinateContainerName)
 {
+    pImpl->pm_begin("ReadAll: read local");
     if(!pImpl->Initialized)
     {
         std::cerr<<"PDMlib::ReadAll() called before Init()"<<std::endl;
@@ -126,7 +130,7 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
     pImpl->DetermineTimeStep(TimeStep, time_steps);
     int& time_step = *TimeStep;
 
-    for(std::set<ContainerPointer*>::iterator it = pImpl->ContainerTable.begin(); it != pImpl->ContainerTable.end(); ++it)
+    for(std::vector<ContainerPointer*>::iterator it = pImpl->ContainerTable.begin(); it != pImpl->ContainerTable.end(); ++it)
     {
         std::vector<std::string> filenames;
         pImpl->MakeFilenameList(&filenames, time_step, (*it)->Name);
@@ -155,6 +159,7 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
             pImpl->CoordinateContainer = *it;
         }
     }
+    pImpl->pm_end("ReadAll: read local");
 
     // ここまでで、ContainerPointer::buff に全データがある状態
     if(MigrationFlag)
@@ -165,8 +170,9 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
         }
     }
 
+    pImpl->pm_begin("ReadAll: unpack");
     // ContainerPointer::buffからContainerPointer::Containerへコピー
-    for(std::set<ContainerPointer*>::iterator it = pImpl->ContainerTable.begin(); it != pImpl->ContainerTable.end(); ++it)
+    for(std::vector<ContainerPointer*>::iterator it = pImpl->ContainerTable.begin(); it != pImpl->ContainerTable.end(); ++it)
     {
         if((*it)->Type == INT32)
         {
@@ -191,6 +197,7 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
     }
 
     ContainerPointer* container_pointer = *(pImpl->ContainerTable.begin());
+    pImpl->pm_end("ReadAll: unpack");
 
     return container_pointer->ContainerLength/container_pointer->nComp;
 }

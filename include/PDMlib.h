@@ -80,10 +80,11 @@ public:
     //! @param [in] argv   main()のargv
     //! @param [in] WriteMetaDataFile メタデータの出力先ファイル名
     //! @param [in] ReadMetaDataFile  メタデータの入力元ファイル名
+    //! @param [in] Timing 計時機能を有効にする
     //
     //ReadMetaDataFileにファイル名として""が指定された時は
     //読み込み用のメタデータはインスタンスを作らない
-    void Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string& ReadMetaDataFile = "");
+    void Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string& ReadMetaDataFile = "", const bool& Timing=false);
 
     //! @brief 1コンテナ分のフィールドデータを読み込む
     //! @param [in]    Name             読み込むコンテナの名前（ContainerInfo::Nameで指定した文字列）
