@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
             for(int i = 0; i < NumData; i++)
             {
                 Rank[i] = 0;
+                Coord[i*3+2]=0.0;
             }
 
             double                bbox[6] = {0, 0, 0, 3*NumData, 3*NumData, 3*NumData};

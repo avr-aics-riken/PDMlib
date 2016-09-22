@@ -113,7 +113,7 @@ namespace VtkWriter
       } else if(typeid(data)==typeid(unsigned int)){
         type = "UInt32";
       } else if(typeid(data)==typeid(unsigned long)){
-        type = "Unt64";
+        type = "UInt64";
       } else if(typeid(data)==typeid(float)){
         type = "Float32";
       } else if(typeid(data)==typeid(double)){
