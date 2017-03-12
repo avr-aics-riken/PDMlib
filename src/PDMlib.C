@@ -146,7 +146,7 @@ size_t PDMlib::ReadAll(int* TimeStep, const bool& MigrationFlag, const std::stri
             for(std::vector<std::pair<size_t, char*> >::iterator it_buff = buffers.begin(); it_buff != buffers.end(); ++it_buff)
             {
                 memcpy((*it)->buff+written_size, (*it_buff).second, (*it_buff).first);
-                delete (*it_buff).second;
+                delete[] (*it_buff).second;
                 written_size += (*it_buff).first;
             }
         }else{
