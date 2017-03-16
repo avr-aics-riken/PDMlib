@@ -47,7 +47,7 @@
 
 cmake_minimum_required(VERSION 2.8.1)
 
-project(PDMlib CXX)
+project(PDMlib)
 
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
 
