@@ -15,7 +15,9 @@
 #include "Utility.h"
 #include "MetaData.h"
 #include "Read.h"
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include <set>
 
 //forward declaration
