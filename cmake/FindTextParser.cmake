@@ -2,9 +2,11 @@
 #
 # PDMlib - Particle Data Management library
 #
+# Copyright (c) 2014 Advanced Institute for Computational Science(AICS), RIKEN.
+# All rights reserved.
 #
-# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
-# All rights reserved. 
+# Copyright (c) 2017 Research Institute for Information Technology(RIIT), Kyushu University.
+# All rights reserved.
 #
 ###################################################################################
 
@@ -39,7 +41,7 @@ find_path(TextParser_INCLUDE_DIR
 find_library(TextParser_LIBRARY
   NAMES TPmpi
   PATHS ${TP_ROOT} ${TextParser_PKGCONF_LIBRARY_DIRS} ${TP_CANDIDATE_PATH}
-  PATH_SUFFIXES lib 
+  PATH_SUFFIXES lib
 )
 
 # Set the include dir variables and the libraries and let libfind_process do the rest.

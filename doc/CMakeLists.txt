@@ -1,4 +1,3 @@
-/*
 ###################################################################################
 #
 # PDMlib - Particle Data Management library
@@ -10,9 +9,8 @@
 # All rights reserved.
 #
 ###################################################################################
-*/
 
-#ifndef PDMLIB_BOM_H
-#define PDMLIB_BOM_H
-#define BOM 9615
-#endif
+# Install files
+
+install(FILES  PDMlib_ug.pdf
+        DESTINATION doc)

@@ -2,273 +2,336 @@
 #
 # PDMlib - Particle Data Management library
 #
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science(AICS), RIKEN.
+# All rights reserved.
 #
-# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
-# All rights reserved. 
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
 #
 ###################################################################################
+#
+#-*- CMAKE -*-#
+# Process this file with cmake to produce a configure script.
 
-#
-# cmake実行時に指定できるオプション
-#
-# -DCMAKE_INSTALL_PREFIX=<prefix>
-#    インストール先のPATHをprefix以下へ変更する (デフォルトは/usr/local)
-#
-# -DCMAKE_PREFIX_PATH=<path>
-#    依存するライブラリを探すパスを指定する (デフォルトは無指定)
-#
-# -DCMAKE_BUILD_TYPE=DEBUG
-#    デバッグ版をビルドする (最適化オプション無し、計時機能off、デバッグ出力on)
-#
-# -Dbuild_vtk_converter=[yes|no]
-#    VTKコンバータをビルドする (デフォルトyes)
-#
-# -Dbuild_fv_converter=[yes|no]
-#    FieldViewコンバータプログラムをビルドする (デフォルトyes)
-#
-# -Dbuild_h5part_converter=[yes|no]
-#    H5Partコンバータをビルドする (デフォルトyes)
-#
-# -Dbuild_samples=[yes|no]
-#    サンプルプログラムをビルドする (デフォルトno)
-#
-# -Dbuild_tests=[yes|no]
-#    テストプログラムをビルドする (デフォルトno)
-#
-# -DFPZIP_ROOT=<path>
-#    Fpzipのインストール先を明示的に指定する (デフォルトは無指定)
-#
-# -DZOLTAN_ROOT=<path>
-#    Zoltanのインストール先を明示的に指定する (デフォルトは無指定)
-#
-# -DTP_ROOT=<path>
-#    TextParserのインストール先を明示的に指定する (デフォルトは無指定)
+# Following parameters must be given at cmake command line
+
+# Build options, see Readme.md for details.
+
+# -D INSTALL_DIR=install_directory
+
+# -D with_MPI={yes|no}
+
+# -D with_TP={*|installed_directory}
+
+# -D with_ZIP={*|installed_directory}
+
+# -D with_FPZIP={*|installed_directory}
+
+# -D with_HDF5=installed_directory
+
+# -D with_ZOLTAN={*|installed_directory}
+
+# -D with_util={yes|no}
+
+# -D with_example={no|yes}
+
+# -D real_type={float|double}
+
+# -D CMAKE_BUILD_TYPE=DEBUG
+
+# -D build_vtk_converter={yes|no}
+
+# -D build_fv_converter={no|yes}
+
+# -D build_h5part_converter={yes|no}
+
+# -D build_tests={yes|no}
 
 
-cmake_minimum_required(VERSION 2.8.1)
+
+cmake_minimum_required(VERSION 2.6)
+
+
+#######
+# Build options
+#######
+
+option (with_util "Enable utility" "ON")
+option (with_MPI "Enable MPI" "ON")
+option (with_example "Compiling examples" "OFF")
+# option (real_type "Type of floating point" "OFF")
+option (build_vtk_converter "Build VTK converter" "ON")
+option (build_fv_converter "Build FieldView converter" "OFF")
+option (build_h5part_converter "Build H5Part converter" "ON")
+option (build_tests "Build test programs" "ON")
+
+#######
+# Project setting
+#######
 
 project(PDMlib)
 
+if(INSTALL_DIR STREQUAL "")
+  set(INSTALL_DIR "/usr/local/PDMlib")
+endif()
+
+# project()でCMAKE_INSTALL_PREFIX=/usr/localとなるので、再定義
+set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
+
+#set(CMAKE_BUILD_TYPE Release)
+
+
+
+#######
+set(PROJECT_VERSION "1.2.0")
+set(LIB_REVISION "20170708_2230")
+
+message(" ")
+message("PROJECT : PDMlib " ${PROJECT_VERSION} " : " ${LIB_REVISION})
+message(" ")
+
+#######
+
+
+
+#######
+# Cmake module
+#######
+
 set(CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake)
-
-option(build_vtk_converter    "build VTK Converter"             ON)
-option(build_fv_converter     "build FV14 Converter"            ON)
-option(build_h5part_converter "build H5Part Converter"          ON)
-option(build_samples          "build sample program for PDMlib" OFF)
-option(build_tests            "build test program for PDMlib"   OFF)
-
-#ビルド設定の表示
-message( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
-message( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
-message( STATUS "Destination PATH: " ${CMAKE_INSTALL_PREFIX})
-message( STATUS "build vtk converter: " ${build_vtk_converter})
-message( STATUS "build FV14 converter: " ${build_fv_converter})
-message( STATUS "build H5Part converter: " ${build_h5part_converter})
-message( STATUS "build sample program: " ${build_samples})
-message( STATUS "build test program: " ${build_tests})
+include(${PROJECT_SOURCE_DIR}/cmake/CompileOptionSelector.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/PDM_package.cmake)
 
 
-##############################################
-#      コンパイル対象ファイルの指定
-##############################################
-#PDMlib本体
-set(LIB_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-set(LIB_SRC
-    ${LIB_SRC_DIR}/Read.C
-    ${LIB_SRC_DIR}/Write.C
-    ${LIB_SRC_DIR}/WriteFactory.C
-    ${LIB_SRC_DIR}/ReadFactory.C
-    ${LIB_SRC_DIR}/PDMlib.C
-    ${LIB_SRC_DIR}/MetaData.C
-    ${LIB_SRC_DIR}/Utility.C
-    )
 
-# コンバータ
-set(FV14CONVERTER_SRC   ${PROJECT_SOURCE_DIR}/tools/FV14Converter.C)
-set(H5PartCONVERTER_SRC ${PROJECT_SOURCE_DIR}/tools/H5PartConverter.C)
-set(VtkCONVERTER_SRC   ${PROJECT_SOURCE_DIR}/tools/VtkConverter.C)
-
-#テストコード
-set(TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test/src)
-set(UNIT_TEST_SRC 
-    ${TEST_SRC_DIR}/gtest_main.cc
-    ${TEST_SRC_DIR}/WriteFileTest.cpp
-    ${TEST_SRC_DIR}/ReadFileTest.cpp
-    ${TEST_SRC_DIR}/EncodeDecodeTest.cpp
-    ${TEST_SRC_DIR}/MetaDataTest.cpp
-    ${TEST_SRC_DIR}/UtilityTest.cpp
-   )
-set(MIGRATION_TEST_SRC  ${TEST_SRC_DIR}/MigrationTest.cpp)
-
-#サンプル
-set(WRITE_SAMPLE_SRC   ${PROJECT_SOURCE_DIR}/example/write.cpp)
-set(RESTART_SAMPLE_SRC ${PROJECT_SOURCE_DIR}/example/restart.cpp)
-set(MIGRATE_SAMPLE_SRC ${PROJECT_SOURCE_DIR}/example/migrate.cpp)
+#######
+# Options
+#######
 
 
-##############################################
-# 依存するパッケージを探す
-##############################################
-find_package (ZLIB       REQUIRED)
-find_package (HDF5)
-find_package (TextParser REQUIRED)
-find_package (FPZIP      REQUIRED)
-find_package (Zoltan     REQUIRED)
-#次の条件判定は正確ではないが
-#Toolchain_Kを使っている時はコンパイラにmpi***pxを指定しているので
-#MPIライブラリの検出を行わないという挙動を意図している
-if(NOT CMAKE_CROSSCOMPILING)
-  find_package (MPI REQUIRED)
+AddOptimizeOption()
+
+#checkOpenMP()
+
+# Real type
+#precision()
+
+# Serial
+if(NOT with_MPI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITHOUT_MPI")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWITHOUT_MPI")
 endif()
 
 
-##############################################
-# include PATHの設定(ライブラリ用)
-##############################################
-set (INCLUDE_DIRS   ${PROJECT_SOURCE_DIR}/include
-                    ${LIB_SRC_DIR}
-                    ${ZLIB_INCLUDE_DIRS}
-                    ${FPZIP_INCLUDE_DIRS}
-                    ${Zoltan_INCLUDE_DIRS}
-                    ${TextParser_INCLUDE_DIRS}
-                    ${MPI_INCLUDE_PATH}
-                   )
-include_directories(${INCLUDE_DIRS})
-if (build_h5part_converter)
-  include_directories(${HDF5_INCLUDE_DIRS})
-endif(build_h5part_converter)
+#######
+# Display options
+#######
 
+message(" ")
+message( STATUS "Destination PATH  : "      ${CMAKE_INSTALL_PREFIX})
+message( STATUS "CMAKE_C_COMPILER  : "      ${CMAKE_C_COMPILER})
+message( STATUS "CMAKE_C_FLAGS     : "      ${CMAKE_C_FLAGS})
+message( STATUS "CMAKE_CXX_COMPILER: "      ${CMAKE_CXX_COMPILER})
+message( STATUS "CMAKE_CXX_FLAGS   : "      ${CMAKE_CXX_FLAGS})
 
-##############################################
-# ライブラリ本体のビルド&インストール
-##############################################
-add_library(PDM STATIC ${LIB_SRC})
-install (TARGETS PDM DESTINATION lib)
-install (FILES ${PROJECT_SOURCE_DIR}/include/PDMlib.h         DESTINATION include)
-install (FILES ${PROJECT_SOURCE_DIR}/doc/PDMlibUserManual.pdf DESTINATION doc)
-install (FILES ${PROJECT_SOURCE_DIR}/LICENSE                  DESTINATION share)
-install (FILES ${PROJECT_SOURCE_DIR}/README.md                DESTINATION share)
-install (FILES ${PROJECT_SOURCE_DIR}/cmake/FindPDMlib.cmake   DESTINATION share)
+message(" ")
+#message( STATUS "Type of floating point : "  ${real_type})
+message( STATUS "Utilities              : "  ${with_util})
+message( STATUS "MPI support            : "  ${with_MPI})
+message( STATUS "Example                : "  ${with_example})
+message( STATUS "TextParser support     : "  ${with_TP})
+message( STATUS "ZIP support            : "  ${with_ZIP})
+message( STATUS "FPZIP support          : "  ${with_FPZIP})
+message( STATUS "HDF5 support           : "  ${with_HDF5})
+message( STATUS "ZOLTAN support         : "  ${with_ZOLTAN})
+message( STATUS "Build VTK converter    : "  ${build_vtk_converter})
+message( STATUS "Build FV converter     : "  ${build_fv_converter})
+message( STATUS "Build H5Part converter : "  ${build_h5part_converter})
+message( STATUS "Build test programs    : "  ${build_tests})
+message(" ")
 
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(PDM PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-if(MPI_LINK_FLAGS)
-  set_target_properties(PDM PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-endif()
+if(USE_F_TCS STREQUAL "YES")
+else()
+  if(with_MPI)
+    include(FindMPI)
 
-
-##############################################
-# ツール類のビルド&インストール
-##############################################
-
-install (PROGRAMS ${PROJECT_SOURCE_DIR}/tools/stage.py DESTINATION bin)
-
-set (MANDATORY_LIBS PDM ${TextParser_LIBRARIES} ${ZLIB_LIBRARIES} ${FPZIP_LIBRARIES} ${Zoltan_LIBRARIES} ${MPI_LIBRARIES})
-
-# FV14用コンバータ
-if (build_fv_converter)
-  add_executable(FV14Converter    ${FV14CONVERTER_SRC})
-  target_link_libraries(FV14Converter   ${MANDATORY_LIBS})
-  install (TARGETS  FV14Converter    DESTINATION bin)
-  if(MPI_COMPILE_FLAGS)
-    set_target_properties(FV14Converter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+    if(MPI_CXX_FOUND)
+      message(" ")
+      message("MPI-CXX-CMP  : ${MPI_CXX_COMPILER}")
+      message("MPI-CXX-FLAGS: ${MPI_CXX_COMPILE_FLAGS}")
+      message("MPI-CXX-INC  : ${MPI_CXX_INCLUDE_PATH}")
+      message("MPI-LNK-FLAGS: ${MPI_CXX_LINK_FLAGS}")
+      message("MPI-LIBS     : ${MPI_CXX_LIBRARIES}")
+      message(" ")
+    endif(MPI_CXX_FOUND)
   endif()
-  if(MPI_LINK_FLAGS)
-    set_target_properties(FV14Converter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-  endif()
-endif (build_fv_converter)
-
-# HDF5用コンバータ
-if (build_h5part_converter)
-  if ( NOT HDF5_FOUND )
-    message("libhdf5 not found. H5PartConverter will not be build!")
-  else()
-    add_executable(H5PartConverter  ${H5PartCONVERTER_SRC})
-    target_link_libraries(H5PartConverter ${MANDATORY_LIBS} ${HDF5_LIBRARIES})
-    install (TARGETS  H5PartConverter  DESTINATION bin)
-    if(MPI_COMPILE_FLAGS)
-      set_target_properties(H5PartConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-    endif()
-    if(MPI_LINK_FLAGS)
-      set_target_properties(H5PartConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-    endif()
-  endif ( NOT HDF5_FOUND )
-endif(build_h5part_converter)
-
-#VTK用コンバータ
-if(build_vtk_converter)
-  add_executable(VtkConverter       ${VtkCONVERTER_SRC})
-  target_link_libraries(VtkConverter ${MANDATORY_LIBS})
-  install (TARGETS  VtkConverter    DESTINATION bin)
-  if(MPI_COMPILE_FLAGS)
-    set_target_properties(VtkConverter PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-  endif()
-  if(MPI_LINK_FLAGS)
-    set_target_properties(VtkConverter PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-  endif()
-endif(build_vtk_converter)
-
-
-
-##############################################
-# サンプルのビルド
-#   cmakeの実行時に -Dbuild_samples=yes が指定された時のみbuildする
-##############################################
-if(build_samples)
-# include PATHの設定(テスト用)
-include_directories(${TEST_SRC_DIR})
-
-# ビルド対象の指定
-add_executable(WriteSample    ${WRITE_SAMPLE_SRC})
-add_executable(RestartSample  ${RESTART_SAMPLE_SRC})
-add_executable(MigrateSample  ${MIGRATE_SAMPLE_SRC})
-add_executable(EndianConversionTest_Write ${PROJECT_SOURCE_DIR}/example/write_test.cpp)
-add_executable(EndianConversionTest_Read  ${PROJECT_SOURCE_DIR}/example/read_test.cpp)
-
-#リンクするライブラリの指定
-target_link_libraries(WriteSample    ${MANDATORY_LIBS})
-target_link_libraries(RestartSample  ${MANDATORY_LIBS})
-target_link_libraries(MigrateSample  ${MANDATORY_LIBS})
-target_link_libraries(EndianConversionTest_Write ${MANDATORY_LIBS})
-target_link_libraries(EndianConversionTest_Read  ${MANDATORY_LIBS})
-
-# インストール
-install (PROGRAMS ${PROJECT_SOURCE_DIR}/test/migration_test.sh DESTINATION bin)
-install (TARGETS WriteSample RestartSample MigrateSample DESTINATION bin)
 endif()
 
-##############################################
-# テストプログラムのビルド&インストール
-#   cmakeの実行時に -Dbuild_tests=yes が指定された時のみbuildする
-##############################################
-if(build_tests)
-#GoogleTest libraryのBUILD
-add_subdirectory(${PROJECT_SOURCE_DIR}/test/gtest)
 
-# include PATHの設定(テスト用)
+#######
+# include PATH
+#######
+
 include_directories(
-                    ${PROJECT_SOURCE_DIR}/test 
-                    ${TEST_SRC_DIR}
-                   )
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/include
+)
 
-# ビルド対象の指定
-add_executable(UnitTest       ${UNIT_TEST_SRC})
-add_executable(MigrationTest  ${MIGRATION_TEST_SRC})
 
-#リンクするライブラリの指定
-target_link_libraries(UnitTest       ${MANDATORY_LIBS} gtest)
-target_link_libraries(MigrationTest  ${MANDATORY_LIBS})
+#######
+# Find Libraries to depend on
+#######
 
-# インストール
-install (TARGETS UnitTest DESTINATION bin)
-set_target_properties(UnitTest PROPERTIES COMPILE_FLAGS "${GTEST_CXX_FLAGS}")
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(UnitTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-  set_target_properties(MigrationTest PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+# Use Find*.cmake
+#find_package (ZLIB       REQUIRED)
+#find_package (HDF5)
+#find_package (TextParser REQUIRED)
+#find_package (FPZIP      REQUIRED)
+#find_package (Zoltan     REQUIRED)
+
+
+# TextParser
+IF(with_TP)
+  SET(TP_DIR "${with_TP}")
+  SET(TP_INC "${TP_DIR}/include")
+  SET(TP_LIB "${TP_DIR}/lib")
+ELSE()
+  MESSAGE("Error: can not find TextParser.")
+ENDIF()
+
+
+# ZIP
+IF(with_ZIP)
+  SET(ZIP_DIR "${with_ZIP}")
+  SET(ZIP_INC "${ZIP_DIR}/include")
+  SET(ZIP_LIB "${ZIP_DIR}/lib")
+ELSE()
+  MESSAGE("Error: can not find ZIP library.")
+ENDIF()
+
+
+# FPZIP
+IF(with_FPZIP)
+  SET(FPZIP_DIR "${with_FPZIP}")
+  SET(FPZIP_INC "${FPZIP_DIR}/include")
+  SET(FPZIP_LIB "${FPZIP_DIR}/lib")
+ELSE()
+  MESSAGE("Error: can not find ZIP library.")
+ENDIF()
+
+
+# HDF5
+IF(with_HDF5)
+  SET(HDF5_DIR "${with_HDF5}")
+  SET(HDF5_INC "${HDF5_DIR}/include")
+  SET(HDF5_LIB "${HDF5_DIR}/lib")
+ELSE()
+  MESSAGE("Error: can not find HDF5 library.")
+ENDIF()
+
+
+# ZOLTAN
+IF(with_ZOLTAN)
+  SET(ZOLTAN_DIR "${with_ZOLTAN}")
+  SET(ZOLTAN_INC "${ZOLTAN_DIR}/include")
+  SET(ZOLTAN_LIB "${ZOLTAN_DIR}/lib")
+ELSE()
+  MESSAGE("Error: can not find ZOLTAN.")
+ENDIF()
+
+
+#add_definitions(-DHAVE_CONFIG_H)
+
+
+
+#######
+# tools
+#######
+
+if(with_util)
+  if(PDM_CROSS_OPTION)
+    message(" ")
+    message("PDMlib tools : not build because cross compilation is assumed")
+  else()
+    message("PDMlib tools : build")
+  endif()
 endif()
-if(MPI_LINK_FLAGS)
-  set_target_properties(UnitTest PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
-  set_target_properties(MigrationTest PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+
+
+
+#######
+# Example
+#######
+
+if (with_example)
+  message("Exampels are built")
+else()
+  message("Skip compiling examples")
 endif()
+
+
+#######
+# Test code
+#######
+
+if (with_tests)
+  enable_testing()
+  message("Code test will be performed")
+else()
+  message("Code test is skipped")
 endif()
+
+
+
+
+#######
+# Sub Directories
+#######
+
+add_subdirectory(src)
+
+if(with_util)
+  if(NOT PDM_CROSS_OPTION)
+    add_subdirectory(tools)
+  endif()
+endif()
+
+add_subdirectory(doc)
+
+if(with_example)
+  if (NOT with_MPI)
+    message("Examples require MPI")
+  else()
+    add_subdirectory(example)
+  endif()
+endif()
+
+if (with_tests)
+  add_subdirectory(test)
+endif()
+
+
+#######
+# configure files
+#######
+
+#configure_file( config.h.in.cmake config.h )
+configure_file( include/pdm_version.h.in ${PROJECT_BINARY_DIR}/include/pdm_version.h @ONLY)
+
+
+#######
+# Install files
+#######
+
+install(FILES  ChangeLog.md
+               Readme.md
+               License.txt
+               ${PROJECT_BINARY_DIR}/CMakeCache.txt
+        DESTINATION share)
+
+
+#######
+# Installer
+#######
+
+pdm_package()

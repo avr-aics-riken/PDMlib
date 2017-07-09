@@ -12,7 +12,15 @@
 ###################################################################################
 */
 
-#ifndef PDMLIB_BOM_H
-#define PDMLIB_BOM_H
-#define BOM 9615
-#endif
+#ifndef _PDM_VERSION_H_
+#define _PDM_VERSION_H_
+
+/**
+ * @file pdm_version.h
+ * バージョン、ビルド情報ヘッダーファイル
+ */
+
+/** PDMlibライブラリのバージョン */
+#define PDM_VERSION  "@PROJECT_VERSION@"
+
+#endif /* _PDM_VERSION_H_ */
