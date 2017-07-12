@@ -137,19 +137,22 @@ int get_region_number(const std::string& filename, const bool& is_rank_step)
 
 int stoi_wrapper(std::string str)
 {
-#if __cplusplus >= 201103L
-  return std::stoi(str);
-#else
+// TODO: Temporary Fix (C++11 Code)
+// #if __cplusplus >= 201103L
+//  return std::stoi(str);
+// #else
   return atoi(str.c_str());
-#endif
+// #endif
 }
+
+// TODO: Temporary Fix (C++11 Code)
 double stod_wrapper(std::string str)
 {
-#if __cplusplus >= 201103L
-  return std::stod(str);
-#else
+// #if __cplusplus >= 201103L
+//   return std::stod(str);
+// #else
   return atof(str.c_str());
-#endif
+// #endif
 }
 
 SupportedType string2enumType(std::string sType)
