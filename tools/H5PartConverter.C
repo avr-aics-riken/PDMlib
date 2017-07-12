@@ -88,7 +88,10 @@ int main(int argc, char* argv[])
     std::set<int> time_steps;
     pdmlib.MakeTimeStepList(&time_steps, start_time, end_time);
     int min_timestep  = *time_steps.begin();
-    bool is_rank_step=pdmlib.is_rank_step();
+
+   //  TODO: Temporary Fix
+   //  bool is_rank_step=pdmlib.is_rank_step();
+       bool is_rank_step=true;
 
     int minimum_nproc = INT_MAX;
     for(std::set<int>::iterator it_time = time_steps.begin(); it_time != time_steps.end(); ++it_time)
