@@ -52,6 +52,12 @@ if(with_MPI)
   add_executable(EndianConversionTest_Read ${PROJECT_SOURCE_DIR}/example/read_test.cpp)
   target_link_libraries(EndianConversionTest_Read ${EXT_LIB_MPI})
 
+  add_executable(MultiInstanceWrite1 ${PROJECT_SOURCE_DIR}/example/multi_instance_write_1.cpp)
+  target_link_libraries(MultiInstanceWrite1 ${EXT_LIB_MPI})
+
+  add_executable(MultiInstanceWrite2 ${PROJECT_SOURCE_DIR}/example/multi_instance_write_2.cpp)
+  target_link_libraries(MultiInstanceWrite2 ${EXT_LIB_MPI})
+
 else()
 
   set(EXT_LIB "-lPDM -lTP -lzoltan -lhdf5 -lfpzip -lz") 
@@ -70,6 +76,12 @@ else()
 
     add_executable(EndianConversionTest_Read ${PROJECT_SOURCE_DIR}/example/read_test.cpp)
     target_link_libraries(EndianConversionTest_Read ${EXT_LIB})
+
+    add_executable(MultiInstanceWrite1 ${PROJECT_SOURCE_DIR}/example/multi_instance_write_1.cpp)
+    target_link_libraries(MultiInstanceWrite1 ${EXT_LIB})
+
+    add_executable(MultiInstanceWrite2 ${PROJECT_SOURCE_DIR}/example/multi_instance_write_2.cpp)
+    target_link_libraries(MultiInstanceWrite2 ${EXT_LIB})
 
 endif()
 
