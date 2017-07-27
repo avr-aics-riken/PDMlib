@@ -9,6 +9,7 @@
 
 #include <mpi.h>
 #include <cmath>
+#include <iostream>
 #include "TestDataGenerator.h"
 #include "PDMlib.h"
 
