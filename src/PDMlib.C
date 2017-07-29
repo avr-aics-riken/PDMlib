@@ -31,13 +31,13 @@
 //! @file PDMlibのコンストラクタ/デストラクタ/publicメソッドの実装
 namespace PDMlib
 {
-PDMlib::PDMlib() : pImpl(new PDMlib::Impl()){}
+  PDMlib::PDMlib() : pImpl(new PDMlib::Impl()){}
 
-PDMlib::~PDMlib()
-{
-    delete pImpl;
-    pImpl = NULL;
-}
+  PDMlib::~PDMlib()
+  {
+      delete pImpl;
+      pImpl = NULL;
+  }
 
 void PDMlib::Init(const int& argc, char** argv, const std::string& WriteMetaDataFile, const std::string& ReadMetaDataFile, const bool& Timing)
 {

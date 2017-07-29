@@ -11,6 +11,7 @@
 #define TEST_DATA_GENERATOR_H
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 template<typename T>
 struct TestDataGenerator

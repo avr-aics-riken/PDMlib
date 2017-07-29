@@ -65,19 +65,20 @@ struct TimeSliceInfo
 
 class PDMlib
 {
-    //Singleton patturn
-
-private:
+public: 
     PDMlib();
-    PDMlib(const PDMlib& obj);
-    PDMlib& operator=(const PDMlib& obj);
-
-public: ~PDMlib();
+    ~PDMlib();
     static PDMlib& GetInstance()
     {
         static PDMlib instance;
         return instance;
     }
+
+//non copyable patturn
+private:
+    PDMlib(const PDMlib& obj);
+    PDMlib& operator=(const PDMlib& obj);
+
 
 public:
     //! @brief PDMlibの初期化を行う

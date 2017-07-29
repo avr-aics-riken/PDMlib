@@ -125,6 +125,7 @@ namespace VtkWriter
   template <typename T>
   struct WriteContainer
   {
+    virtual ~WriteContainer(){};
     virtual void write(std::ofstream& ofs, const int& num_comp, const size_t& num_elements, const T* container)=0;
   };
 

@@ -36,7 +36,7 @@ link_directories(
 
 if(with_MPI)
 
-  set(EXT_LIB_MPI "-lPDMmpi -lTPmpi -lzoltan -lhdf5 -lfpzip -lz") 
+  set(EXT_LIB_MPI "-lPDMmpi -lTPmpi -lzoltan -lhdf5 -lfpzip -lz ${MPI_CXX_LIBRARIES}") 
 
   if (build_vtk_converter)
     add_executable(VtkConverter VtkConverter.C)
