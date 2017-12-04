@@ -12,6 +12,10 @@ REVISION HISTORY
 ================
 
 ---
+2017-12-06  version 1.3.0
+  - bug fix, update UG,...
+
+---
 2017-07-09  version 1.2.0
   - cmake version
 
